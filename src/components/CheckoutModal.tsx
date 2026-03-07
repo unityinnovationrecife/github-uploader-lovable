@@ -2,12 +2,14 @@ import { X, Send, MapPin, User, CreditCard, Home, ChevronRight, ShoppingBag, Arr
 import { useCartStore } from '@/store/cart-store';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 
 type DeliveryZone = 'residence' | 'dois_unidos' | '';
 type Step = 1 | 2;
 
 export default function CheckoutModal() {
   const { items, isCheckoutOpen, closeCheckout, getTotalPrice, clearCart, removeItem } = useCartStore();
+  const navigate = useNavigate();
   const [step, setStep] = useState<Step>(1);
   const [nome, setNome] = useState('');
   const [rua, setRua] = useState('');
@@ -48,6 +50,8 @@ export default function CheckoutModal() {
     e.preventDefault();
     if (!zone) { alert('Por favor, selecione seu bairro/condomínio para entrega.'); return; }
 
+    let savedOrderId: string | null = null;
+
     try {
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
@@ -65,6 +69,7 @@ export default function CheckoutModal() {
         .single();
 
       if (!orderError && orderData) {
+        savedOrderId = orderData.id;
         const orderItems = items.map((item) => ({
           order_id: orderData.id,
           product_id: item.id,
@@ -106,6 +111,10 @@ export default function CheckoutModal() {
     clearCart();
     closeCheckout();
     setNome(''); setRua(''); setNumero(''); setReferencia(''); setPagamento(''); setZone('');
+
+    if (savedOrderId) {
+      navigate(`/pedido/${savedOrderId}`);
+    }
   };
 
   return (

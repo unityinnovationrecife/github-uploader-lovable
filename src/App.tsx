@@ -11,6 +11,7 @@ import AdminLayout from "./components/admin/AdminLayout";
 import AdminProdutos from "./pages/admin/AdminProdutos";
 import AdminPedidos from "./pages/admin/AdminPedidos";
 import AdminAcompanhamentos from "./pages/admin/AdminAcompanhamentos";
+import OrderTracking from "./pages/OrderTracking";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/pedido/:id" element={<OrderTracking />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<Navigate to="/admin/produtos" replace />} />
