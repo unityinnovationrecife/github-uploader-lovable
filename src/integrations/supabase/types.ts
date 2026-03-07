@@ -137,6 +137,7 @@ export type Database = {
           max_flavors: number | null
           name: string
           price: number
+          visible: boolean
         }
         Insert: {
           allow_duplicate_flavors?: boolean
@@ -153,6 +154,7 @@ export type Database = {
           max_flavors?: number | null
           name: string
           price: number
+          visible?: boolean
         }
         Update: {
           allow_duplicate_flavors?: boolean
@@ -169,6 +171,7 @@ export type Database = {
           max_flavors?: number | null
           name?: string
           price?: number
+          visible?: boolean
         }
         Relationships: []
       }
