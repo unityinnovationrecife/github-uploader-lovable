@@ -31,7 +31,7 @@ export default function CartFloatingButton() {
   return (
     <button
       onClick={toggleCart}
-      className="fixed bottom-4 left-4 right-4 sm:bottom-6 sm:left-auto sm:right-6 sm:w-auto z-40 flex items-center justify-between sm:gap-6 px-5 py-4 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-red-600 text-white shadow-2xl shadow-orange-500/40 active:scale-[0.97] transition-all duration-300 animate-cart-enter animate-cart-pulse hover:shadow-orange-500/60 hover:scale-[1.02]"
+      className="fixed bottom-4 left-4 right-4 sm:bottom-6 sm:left-auto sm:right-6 sm:w-auto z-40 relative flex items-center justify-between sm:gap-6 px-5 py-4 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-red-600 text-white shadow-2xl shadow-orange-500/40 active:scale-[0.97] transition-all duration-300 animate-cart-enter animate-cart-pulse hover:shadow-orange-500/60 hover:scale-[1.02] overflow-hidden"
       style={{
         backgroundSize: '200% auto',
       }}
