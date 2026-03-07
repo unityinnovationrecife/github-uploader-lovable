@@ -105,10 +105,11 @@ export default function AdminPedidos() {
   const fmtDate = (d: string) => new Date(d).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <div className="mb-8 flex items-end justify-between">
+    <div className="flex flex-col h-full overflow-hidden">
+      {/* Header fixo */}
+      <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-border bg-background sticky top-0 z-10">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Pedidos</h1>
+          <h1 className="text-2xl font-bold text-foreground">Pedidos</h1>
           <p className="text-muted-foreground text-sm mt-1">{orders.length} pedido{orders.length !== 1 ? 's' : ''} no total</p>
         </div>
         <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-primary/10 text-primary border border-primary/20 px-3 py-1.5 rounded-full">
@@ -117,13 +118,16 @@ export default function AdminPedidos() {
         </span>
       </div>
 
-      {loading ? (
-        <div className="flex justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {orders.map((order) => {
+      {/* Lista com scroll */}
+      <div className="flex-1 overflow-auto p-6">
+        <div className="max-w-5xl mx-auto space-y-3">
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <>
+              {orders.map((order) => {
             const statusCfg = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
             const StatusIcon = statusCfg.icon;
             const isExpanded = expanded === order.id;
@@ -228,8 +232,10 @@ export default function AdminPedidos() {
               Nenhum pedido ainda.
             </div>
           )}
+            </>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
