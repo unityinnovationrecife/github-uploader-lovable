@@ -65,25 +65,33 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        "cart-enter": {
+          "0%": { transform: "translateY(120%) scale(0.8)", opacity: "0" },
+          "60%": { transform: "translateY(-8%) scale(1.03)", opacity: "1" },
+          "100%": { transform: "translateY(0) scale(1)", opacity: "1" },
+        },
+        "cart-pulse": {
+          "0%, 100%": { boxShadow: "0 0 0 0 rgba(249,115,22,0.5)" },
+          "50%": { boxShadow: "0 0 0 14px rgba(249,115,22,0)" },
+        },
+        "cart-shimmer": {
+          "0%": { backgroundPosition: "-200% center" },
+          "100%": { backgroundPosition: "200% center" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "cart-enter": "cart-enter 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
+        "cart-pulse": "cart-pulse 2s ease-in-out infinite",
+        "cart-shimmer": "cart-shimmer 2.5s linear infinite",
       },
     },
   },
