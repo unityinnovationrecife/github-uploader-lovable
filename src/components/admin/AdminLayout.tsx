@@ -132,7 +132,7 @@ export default function AdminLayout() {
       )}
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto pt-14 md:pt-0">
+      <main className="flex-1 overflow-hidden pt-14 md:pt-0 flex flex-col">
         <Outlet />
       </main>
     </div>
