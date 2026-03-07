@@ -212,26 +212,51 @@ export default function AdminPedidos() {
 
                     {/* Status Update */}
                     <div>
-                      <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Atualizar Status</p>
-                      <div className="flex flex-wrap gap-2">
-                        {Object.entries(STATUS_CONFIG).map(([key, cfg]) => {
+                      <p className="text-xs font-semibold text-muted-foreground uppercase mb-3">Atualizar Status</p>
+
+                      {/* Pipeline de status */}
+                      <div className="flex items-center gap-1 mb-3 flex-wrap">
+                        {STATUS_FLOW.map((key, idx) => {
+                          const cfg = STATUS_CONFIG[key];
                           const Icon = cfg.icon;
+                          const isActive = order.status === key;
+                          const isPast = STATUS_FLOW.indexOf(order.status) > idx;
                           return (
-                            <button
-                              key={key}
-                              onClick={() => updateStatus(order.id, key)}
-                              className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-all ${
-                                order.status === key
-                                  ? cfg.color + ' font-semibold'
-                                  : 'border-border text-muted-foreground hover:bg-muted'
-                              }`}
-                            >
-                              <Icon className="w-3 h-3" />
-                              {cfg.label}
-                            </button>
+                            <div key={key} className="flex items-center gap-1">
+                              <button
+                                onClick={() => updateStatus(order.id, key)}
+                                title={cfg.label}
+                                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-medium transition-all ${
+                                  isActive
+                                    ? `${cfg.activeBg} text-white border-transparent shadow-sm`
+                                    : isPast
+                                    ? 'bg-muted/60 text-muted-foreground border-border line-through'
+                                    : 'bg-background text-muted-foreground border-border hover:border-primary/40 hover:text-foreground'
+                                }`}
+                              >
+                                <Icon className="w-3.5 h-3.5" />
+                                {cfg.label}
+                              </button>
+                              {idx < STATUS_FLOW.length - 1 && (
+                                <ChevronRight className={`w-3.5 h-3.5 flex-shrink-0 ${isPast || isActive ? 'text-muted-foreground' : 'text-border'}`} />
+                              )}
+                            </div>
                           );
                         })}
                       </div>
+
+                      {/* Cancelar separado */}
+                      <button
+                        onClick={() => updateStatus(order.id, 'cancelled')}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all ${
+                          order.status === 'cancelled'
+                            ? 'bg-red-500 text-white border-transparent'
+                            : 'border-red-300 text-red-500 hover:bg-red-500/10'
+                        }`}
+                      >
+                        <XCircle className="w-3.5 h-3.5" />
+                        Cancelar pedido
+                      </button>
                     </div>
                   </div>
                 )}
