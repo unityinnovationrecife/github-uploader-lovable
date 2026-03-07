@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, NavLink, Outlet } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { ChefHat, Package, ShoppingBag, UtensilsCrossed, LogOut, Menu, X } from 'lucide-react';
+import { ChefHat, Package, ShoppingBag, UtensilsCrossed, LogOut, Menu, X, Store } from 'lucide-react';
 import logo from '@/assets/logo.png';
 
 export default function AdminLayout() {
@@ -46,7 +46,9 @@ export default function AdminLayout() {
       {/* Sidebar Desktop */}
       <aside className="hidden md:flex flex-col w-60 bg-card border-r border-border">
         <div className="p-4 border-b border-border flex items-center justify-center">
-          <img src={logo} alt="G&S Salgados" className="h-16 w-auto object-contain" />
+          <a href="/" title="Voltar para a loja">
+            <img src={logo} alt="G&S Salgados" className="h-16 w-auto object-contain hover:opacity-80 transition-opacity" />
+          </a>
         </div>
 
         <nav className="flex-1 p-4 space-y-1">
@@ -68,7 +70,14 @@ export default function AdminLayout() {
           ))}
         </nav>
 
-        <div className="p-4 border-t border-border">
+        <div className="p-4 border-t border-border space-y-1">
+          <a
+            href="/"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-all w-full"
+          >
+            <Store className="w-4 h-4" />
+            Ver Loja
+          </a>
           <button
             onClick={handleLogout}
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all w-full"
