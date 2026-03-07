@@ -17,6 +17,7 @@ type Product = {
   allow_duplicate_flavors: boolean;
   has_acomp: boolean;
   display_order: number;
+  visible: boolean;
 };
 
 const CATEGORIES = ['Coxinhas', 'Salgados', 'Porções', 'Pastel', 'Bebidas'];
@@ -34,6 +35,7 @@ const emptyForm = (): Omit<Product, 'id'> => ({
   allow_duplicate_flavors: false,
   has_acomp: false,
   display_order: 0,
+  visible: true,
 });
 
 export default function AdminProdutos() {
@@ -155,6 +157,13 @@ export default function AdminProdutos() {
     }
   };
 
+  const toggleVisible = async (id: string, current: boolean) => {
+    const { error } = await supabase.from('products').update({ visible: !current }).eq('id', id);
+    if (!error) {
+      setProducts(prev => prev.map(p => p.id === id ? { ...p, visible: !current } : p));
+    }
+  };
+
   return (
     <div className="flex flex-col h-full">
       {/* Header fixo */}
@@ -203,7 +212,7 @@ export default function AdminProdutos() {
                   </thead>
                   <tbody className="divide-y divide-border">
                     {group.map((p) => (
-                      <tr key={p.id} className="hover:bg-muted/30 transition-colors">
+                       <tr key={p.id} className={`hover:bg-muted/30 transition-colors ${!p.visible ? 'opacity-50' : ''}`}>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
                             {p.image ? (
@@ -224,7 +233,21 @@ export default function AdminProdutos() {
                         </td>
                         <td className="px-4 py-3 hidden md:table-cell text-muted-foreground text-sm">{p.display_order}</td>
                         <td className="px-4 py-3">
-                          <div className="flex items-center gap-1 justify-end">
+                          <div className="flex items-center gap-2 justify-end">
+                            {/* Switch visível */}
+                            <button
+                              onClick={() => toggleVisible(p.id, p.visible ?? true)}
+                              title={p.visible ? 'Ocultar da loja' : 'Mostrar na loja'}
+                              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${
+                                p.visible ? 'bg-primary' : 'bg-muted-foreground/30'
+                              }`}
+                            >
+                              <span
+                                className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${
+                                  p.visible ? 'translate-x-4' : 'translate-x-1'
+                                }`}
+                              />
+                            </button>
                             <button onClick={() => openEdit(p)} className="p-2 rounded-lg hover:bg-muted transition-colors">
                               <Pencil className="w-4 h-4 text-muted-foreground" />
                             </button>

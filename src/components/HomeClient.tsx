@@ -25,6 +25,7 @@ export default function HomeClient() {
         const { data: rawProducts } = await supabase
           .from('products')
           .select('*')
+          .eq('visible', true)
           .order('display_order', { ascending: true });
 
         const { data: rawAcomp } = await supabase
