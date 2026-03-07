@@ -49,9 +49,9 @@ export default function CheckoutModal() {
       return;
     }
 
-    // Save order to Supabase directly
+    // Save order to database
     try {
-      const { error } = await supabase.from('orders').insert({
+      const { data: orderData, error: orderError } = await supabase.from('orders').insert({
         customer_name: nome,
         delivery_zone: zone,
         delivery_zone_name: getZoneName(),
@@ -60,17 +60,24 @@ export default function CheckoutModal() {
         subtotal: getTotalPrice(),
         delivery_fee: deliveryFee,
         total: finalTotal,
-        items: items.map((item) => ({
+      }).select('id').single();
+
+      if (orderError) {
+        console.error('Erro ao salvar pedido:', orderError);
+      } else if (orderData) {
+        const orderItems = items.map((item) => ({
+          order_id: orderData.id,
           product_id: item.id,
           product_name: item.name,
           quantity: item.quantity,
           unit_price: item.price,
           selected_flavors: item.selectedFlavors || [],
           selected_acomp: item.selectedAcomp || [],
-        })),
-      });
-      if (error) {
-        console.error('Erro ao salvar pedido:', error);
+        }));
+        const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
+        if (itemsError) {
+          console.error('Erro ao salvar itens do pedido:', itemsError);
+        }
       }
     } catch (error) {
       console.error('Erro ao salvar pedido:', error);
