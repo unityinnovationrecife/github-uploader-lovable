@@ -45,16 +45,8 @@ export default function AdminLayout() {
     <div className="h-screen bg-background flex overflow-hidden">
       {/* Sidebar Desktop */}
       <aside className="hidden md:flex flex-col w-60 bg-card border-r border-border">
-        <div className="p-6 border-b border-border">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
-              <ChefHat className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <div>
-              <p className="font-bold text-foreground text-sm">G&S Salgados</p>
-              <p className="text-xs text-muted-foreground">Admin</p>
-            </div>
-          </div>
+        <div className="p-4 border-b border-border flex items-center justify-center">
+          <img src={logo} alt="G&S Salgados" className="h-16 w-auto object-contain" />
         </div>
 
         <nav className="flex-1 p-4 space-y-1">

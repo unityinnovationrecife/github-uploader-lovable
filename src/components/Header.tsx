@@ -29,16 +29,8 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Logo */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden flex-shrink-0 bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
-              <span className="text-xl">🍗</span>
-            </div>
-            <div>
-              <h1 className="text-lg sm:text-xl font-bold text-[var(--text-primary)] tracking-tight">
-                G & S <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500">Salgados</span>
-              </h1>
-              <p className="text-[10px] sm:text-xs text-[var(--text-muted)] -mt-0.5">O melhor sabor da cidade</p>
-            </div>
+          <div className="flex items-center">
+            <img src={logo} alt="G&S Salgados" className="h-12 sm:h-16 w-auto object-contain" />
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
