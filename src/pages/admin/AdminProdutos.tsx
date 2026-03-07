@@ -15,6 +15,7 @@ type Product = {
   available_flavors: string[] | null;
   max_flavors: number | null;
   allow_duplicate_flavors: boolean;
+  has_acomp: boolean;
   display_order: number;
 };
 
@@ -31,6 +32,7 @@ const emptyForm = (): Omit<Product, 'id'> => ({
   available_flavors: null,
   max_flavors: null,
   allow_duplicate_flavors: false,
+  has_acomp: false,
   display_order: 0,
 });
 
