@@ -232,6 +232,8 @@ export default function AdminPedidos() {
               Nenhum pedido ainda.
             </div>
           )}
+            </>
+          )}
         </div>
       </div>
     </div>
