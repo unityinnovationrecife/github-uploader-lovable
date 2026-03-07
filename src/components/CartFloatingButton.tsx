@@ -19,7 +19,7 @@ export default function CartFloatingButton() {
     }
   });
 
-  if (!mounted || totalItems === 0) return null;
+  if (!mounted || totalItems === 0 || isCartOpen) return null;
 
   const formatPrice = (price: number) => {
     return price.toLocaleString('pt-BR', {
