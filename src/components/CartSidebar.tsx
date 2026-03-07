@@ -1,6 +1,7 @@
-import { X, Plus, Minus, Trash2, ShoppingBag } from 'lucide-react';
+import { X, Plus, Minus, Trash2 } from 'lucide-react';
 import { useCartStore } from '@/store/cart-store';
 import { useEffect, useState } from 'react';
+import logo from '@/assets/logo.png';
 
 export default function CartSidebar() {
   const {
