@@ -56,10 +56,19 @@ export default function Header() {
   return (
     <div className="sticky top-0 z-40 w-full">
       {/* ── Barra de destaque ── */}
-      <div className="w-full bg-gradient-to-r from-orange-500 via-amber-500 to-red-500 text-white text-xs sm:text-sm py-2 px-4 flex items-center justify-center gap-2 font-medium tracking-wide">
-        <Truck className="w-4 h-4 shrink-0" />
-        <span>🚚 Entrega rápida na região!</span>
-      </div>
+      {showBanner && (
+        <div className="w-full bg-gradient-to-r from-orange-500 via-amber-500 to-red-500 text-white text-xs sm:text-sm py-2 px-4 flex items-center justify-center gap-2 font-medium tracking-wide relative">
+          <Truck className="w-4 h-4 shrink-0" />
+          <span>🚚 Entrega rápida na região!</span>
+          <button
+            onClick={() => setShowBanner(false)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded hover:bg-white/20 transition-colors"
+            aria-label="Fechar aviso"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
 
       {/* ── Header principal ── */}
       <header className="w-full backdrop-blur-xl bg-[var(--bg-header)] border-b border-[var(--border-color)] transition-colors duration-300">
