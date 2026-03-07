@@ -10,7 +10,10 @@ export default function CheckoutModal() {
   const { items, isCheckoutOpen, closeCheckout, getTotalPrice, clearCart, removeItem } = useCartStore();
   const [step, setStep] = useState<Step>(1);
   const [nome, setNome] = useState('');
-  const [endereco, setEndereco] = useState('');
+  const [rua, setRua] = useState('');
+  const [numero, setNumero] = useState('');
+  const [referencia, setReferencia] = useState('');
+  const endereco = zone === 'residence' ? `${rua}, ${numero}` : [rua, numero, referencia].filter(Boolean).join(', ');
   const [pagamento, setPagamento] = useState('');
   const [zone, setZone] = useState<DeliveryZone>('');
   const [mounted, setMounted] = useState(false);
