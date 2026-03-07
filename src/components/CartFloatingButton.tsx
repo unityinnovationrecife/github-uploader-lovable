@@ -3,7 +3,7 @@ import { useCartStore } from '@/store/cart-store';
 import { useEffect, useState } from 'react';
 
 export default function CartFloatingButton() {
-  const { toggleCart, getTotalItems, getTotalPrice } = useCartStore();
+  const { toggleCart, getTotalItems, getTotalPrice, isCartOpen } = useCartStore();
   const [totalItems, setTotalItems] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
   const [mounted, setMounted] = useState(false);
