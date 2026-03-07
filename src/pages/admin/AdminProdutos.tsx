@@ -292,13 +292,42 @@ export default function AdminProdutos() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground mb-1 block">URL da Imagem *</label>
+                  <label className="text-sm font-medium text-muted-foreground mb-1 block">Imagem do Produto *</label>
+                  {/* Image Preview */}
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="relative w-full aspect-video rounded-xl border-2 border-dashed border-border bg-muted/30 hover:bg-muted/60 transition-all cursor-pointer overflow-hidden flex items-center justify-center"
+                  >
+                    {imagePreview ? (
+                      <>
+                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <Upload className="w-6 h-6 text-white" />
+                          <span className="text-white text-sm ml-2">Trocar imagem</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                        <ImagePlus className="w-8 h-8" />
+                        <span className="text-xs text-center">Clique para selecionar<br />JPG, PNG, WEBP</span>
+                      </div>
+                    )}
+                    {uploadingImage && (
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                        <Loader2 className="w-6 h-6 text-white animate-spin" />
+                      </div>
+                    )}
+                  </div>
                   <input
-                    required value={form.image}
-                    onChange={e => setForm({ ...form, image: e.target.value })}
-                    placeholder="https://..."
-                    className="w-full px-3 py-2 rounded-xl bg-background border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm"
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageChange}
                   />
+                  {imageFile && (
+                    <p className="text-xs text-muted-foreground mt-1 truncate">{imageFile.name}</p>
+                  )}
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground mb-1 block">Ordem de Exibição</label>
