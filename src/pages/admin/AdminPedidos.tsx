@@ -26,14 +26,26 @@ type Order = {
   items?: OrderItem[];
 };
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ElementType }> = {
-  pending: { label: 'Pendente', color: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/30', icon: Clock },
-  confirmed: { label: 'Confirmado', color: 'bg-blue-500/10 text-blue-600 border-blue-500/30', icon: CheckCircle },
-  preparing: { label: 'Preparando', color: 'bg-orange-500/10 text-orange-600 border-orange-500/30', icon: ChefHat },
-  delivering: { label: 'Em entrega', color: 'bg-purple-500/10 text-purple-600 border-purple-500/30', icon: Truck },
-  delivered: { label: 'Entregue', color: 'bg-green-500/10 text-green-600 border-green-500/30', icon: CheckCircle },
-  cancelled: { label: 'Cancelado', color: 'bg-red-500/10 text-red-600 border-red-500/30', icon: XCircle },
+const STATUS_CONFIG: Record<string, { label: string; activeColor: string; activeBg: string; icon: React.ElementType }> = {
+  pending:   { label: 'Pendente',   activeColor: 'text-yellow-600', activeBg: 'bg-yellow-500',  icon: Clock },
+  confirmed: { label: 'Confirmado', activeColor: 'text-blue-600',   activeBg: 'bg-blue-500',    icon: CheckCircle },
+  preparing: { label: 'Preparando', activeColor: 'text-orange-600', activeBg: 'bg-orange-500',  icon: ChefHat },
+  delivering:{ label: 'Em entrega', activeColor: 'text-purple-600', activeBg: 'bg-purple-500',  icon: Truck },
+  delivered: { label: 'Entregue',   activeColor: 'text-green-600',  activeBg: 'bg-green-500',   icon: CheckCircle },
+  cancelled: { label: 'Cancelado',  activeColor: 'text-red-600',    activeBg: 'bg-red-500',     icon: XCircle },
 };
+
+// Badge color for the order header
+const STATUS_BADGE: Record<string, string> = {
+  pending:    'bg-yellow-500/10 text-yellow-600 border-yellow-500/30',
+  confirmed:  'bg-blue-500/10 text-blue-600 border-blue-500/30',
+  preparing:  'bg-orange-500/10 text-orange-600 border-orange-500/30',
+  delivering: 'bg-purple-500/10 text-purple-600 border-purple-500/30',
+  delivered:  'bg-green-500/10 text-green-600 border-green-500/30',
+  cancelled:  'bg-red-500/10 text-red-600 border-red-500/30',
+};
+
+const STATUS_FLOW = ['pending', 'confirmed', 'preparing', 'delivering', 'delivered'];
 
 export default function AdminPedidos() {
   const [orders, setOrders] = useState<Order[]>([]);
