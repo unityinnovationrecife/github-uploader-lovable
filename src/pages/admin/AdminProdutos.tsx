@@ -154,8 +154,9 @@ export default function AdminProdutos() {
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+    <div className="flex flex-col h-full">
+      {/* Header fixo */}
+      <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-border bg-background sticky top-0 z-10">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Produtos</h1>
           <p className="text-muted-foreground text-sm">{products.length} produtos cadastrados</p>
@@ -169,66 +170,69 @@ export default function AdminProdutos() {
         </button>
       </div>
 
-      {loading ? (
-        <div className="flex justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
-      ) : (
-        <div className="bg-card border border-border rounded-2xl overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border bg-muted/50">
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Produto</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase hidden sm:table-cell">Categoria</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Preço</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase hidden md:table-cell">Ordem</th>
-                <th className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {products.map((p) => (
-                <tr key={p.id} className="hover:bg-muted/30 transition-colors">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      {p.image ? (
-                        <img src={p.image} alt={p.name} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
-                      ) : (
-                        <span className="text-xl w-10 h-10 flex items-center justify-center">{p.emoji}</span>
-                      )}
-                      <div>
-                        <p className="font-medium text-foreground text-sm">{p.name}</p>
-                        <p className="text-xs text-muted-foreground line-clamp-1">{p.description}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 hidden sm:table-cell">
-                    <span className="text-xs px-2 py-1 rounded-full bg-muted text-muted-foreground">{p.category}</span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="font-semibold text-foreground">
-                      {Number(p.price).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 hidden md:table-cell text-muted-foreground text-sm">{p.display_order}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-1 justify-end">
-                      <button onClick={() => openEdit(p)} className="p-2 rounded-lg hover:bg-muted transition-colors">
-                        <Pencil className="w-4 h-4 text-muted-foreground" />
-                      </button>
-                      <button onClick={() => handleDelete(p.id, p.name)} className="p-2 rounded-lg hover:bg-destructive/10 transition-colors">
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </button>
-                    </div>
-                  </td>
+      {/* Tabela com scroll */}
+      <div className="flex-1 overflow-auto p-6">
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        ) : (
+          <div className="bg-card border border-border rounded-2xl overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border bg-muted/50">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Produto</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase hidden sm:table-cell">Categoria</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase">Preço</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase hidden md:table-cell">Ordem</th>
+                  <th className="px-4 py-3" />
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          {products.length === 0 && (
-            <div className="text-center py-12 text-muted-foreground">Nenhum produto cadastrado ainda.</div>
-          )}
-        </div>
-      )}
+              </thead>
+              <tbody className="divide-y divide-border">
+                {products.map((p) => (
+                  <tr key={p.id} className="hover:bg-muted/30 transition-colors">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        {p.image ? (
+                          <img src={p.image} alt={p.name} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+                        ) : (
+                          <span className="text-xl w-10 h-10 flex items-center justify-center">{p.emoji}</span>
+                        )}
+                        <div>
+                          <p className="font-medium text-foreground text-sm">{p.name}</p>
+                          <p className="text-xs text-muted-foreground line-clamp-1">{p.description}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 hidden sm:table-cell">
+                      <span className="text-xs px-2 py-1 rounded-full bg-muted text-muted-foreground">{p.category}</span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="font-semibold text-foreground">
+                        {Number(p.price).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 hidden md:table-cell text-muted-foreground text-sm">{p.display_order}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-1 justify-end">
+                        <button onClick={() => openEdit(p)} className="p-2 rounded-lg hover:bg-muted transition-colors">
+                          <Pencil className="w-4 h-4 text-muted-foreground" />
+                        </button>
+                        <button onClick={() => handleDelete(p.id, p.name)} className="p-2 rounded-lg hover:bg-destructive/10 transition-colors">
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {products.length === 0 && (
+              <div className="text-center py-12 text-muted-foreground">Nenhum produto cadastrado ainda.</div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Form Modal */}
       {showForm && (

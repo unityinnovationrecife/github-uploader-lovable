@@ -41,7 +41,7 @@ export default function AdminLayout() {
   ];
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="h-screen bg-background flex overflow-hidden">
       {/* Sidebar Desktop */}
       <aside className="hidden md:flex flex-col w-60 bg-card border-r border-border">
         <div className="p-6 border-b border-border">
@@ -132,7 +132,7 @@ export default function AdminLayout() {
       )}
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto pt-14 md:pt-0">
+      <main className="flex-1 overflow-hidden pt-14 md:pt-0 flex flex-col">
         <Outlet />
       </main>
     </div>
