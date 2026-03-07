@@ -276,24 +276,26 @@ export default function CheckoutModal() {
                     {zone === 'residence' ? 'Bloco e Apartamento' : 'Endereço'}
                   </label>
                   <div className="space-y-2">
-                    <input
-                      type="text"
-                      value={rua}
-                      onChange={(e) => setRua(e.target.value)}
-                      required
-                      placeholder={zone === 'residence' ? 'Bloco' : 'Rua'}
-                      disabled={!zone}
-                      className="w-full px-4 py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    />
-                    <input
-                      type="text"
-                      value={numero}
-                      onChange={(e) => setNumero(e.target.value)}
-                      required
-                      placeholder={zone === 'residence' ? 'Apartamento' : 'Número'}
-                      disabled={!zone}
-                      className="w-full px-4 py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    />
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={rua}
+                        onChange={(e) => setRua(e.target.value)}
+                        required
+                        placeholder={zone === 'residence' ? 'Bloco' : 'Rua'}
+                        disabled={!zone}
+                        className="w-[70%] px-4 py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      />
+                      <input
+                        type="text"
+                        value={numero}
+                        onChange={(e) => setNumero(e.target.value)}
+                        required
+                        placeholder={zone === 'residence' ? 'Apto' : 'Nº'}
+                        disabled={!zone}
+                        className="w-[30%] px-4 py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      />
+                    </div>
                     {zone !== 'residence' && (
                       <input
                         type="text"
