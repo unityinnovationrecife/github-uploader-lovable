@@ -50,7 +50,7 @@ export default function ProductCard({ product, onSelectFlavors }: ProductCardPro
 
   return (
     <div
-      className={`group relative bg-[var(--bg-card)] border rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-500 hover:-translate-y-1 ${
+      className={`group relative bg-[var(--bg-card)] border rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-500 hover:-translate-y-1 flex flex-col h-full ${
         isCombo
           ? 'border-orange-500/30 hover:border-orange-500/50 hover:shadow-orange-500/10'
           : 'border-[var(--border-color)] hover:border-orange-500/30 hover:shadow-orange-500/5'
@@ -98,15 +98,17 @@ export default function ProductCard({ product, onSelectFlavors }: ProductCardPro
       </div>
 
       {/* Content */}
-      <div className="p-4 sm:p-5">
-        <h3 className="text-sm sm:text-base font-bold text-[var(--text-primary)] mb-1 group-hover:text-orange-500 transition-colors">
-          {product.name}
-        </h3>
-        <p className="text-xs text-[var(--text-muted)] mb-3 line-clamp-2 leading-relaxed">
-          {product.description}
-        </p>
+      <div className="p-4 sm:p-5 flex flex-col flex-1">
+        <div className="flex-1">
+          <h3 className="text-sm sm:text-base font-bold text-[var(--text-primary)] mb-1 group-hover:text-orange-500 transition-colors">
+            {product.name}
+          </h3>
+          <p className="text-xs text-[var(--text-muted)] mb-3 line-clamp-2 leading-relaxed">
+            {product.description}
+          </p>
+        </div>
 
-        <div className="space-y-3">
+        <div className="space-y-3 mt-auto">
           <p className="text-lg sm:text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">
             {formatPrice(product.price)}
           </p>
