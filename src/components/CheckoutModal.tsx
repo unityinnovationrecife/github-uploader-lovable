@@ -105,7 +105,7 @@ export default function CheckoutModal() {
     window.open(`https://wa.me/5581992429014?text=${encodeURIComponent(lines.join('\n'))}`, '_blank');
     clearCart();
     closeCheckout();
-    setNome(''); setEndereco(''); setPagamento(''); setZone('');
+    setNome(''); setRua(''); setNumero(''); setReferencia(''); setPagamento(''); setZone('');
   };
 
   return (
