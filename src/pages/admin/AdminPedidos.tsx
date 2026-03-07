@@ -121,7 +121,13 @@ export default function AdminPedidos() {
       {/* Lista com scroll */}
       <div className="flex-1 overflow-auto p-6">
         <div className="max-w-5xl mx-auto space-y-3">
-          {orders.map((order) => {
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <>
+              {orders.map((order) => {
             const statusCfg = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
             const StatusIcon = statusCfg.icon;
             const isExpanded = expanded === order.id;
