@@ -157,6 +157,13 @@ export default function AdminProdutos() {
     }
   };
 
+  const toggleVisible = async (id: string, current: boolean) => {
+    const { error } = await supabase.from('products').update({ visible: !current }).eq('id', id);
+    if (!error) {
+      setProducts(prev => prev.map(p => p.id === id ? { ...p, visible: !current } : p));
+    }
+  };
+
   return (
     <div className="flex flex-col h-full">
       {/* Header fixo */}
