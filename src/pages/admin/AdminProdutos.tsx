@@ -190,7 +190,11 @@ export default function AdminProdutos() {
                 <tr key={p.id} className="hover:bg-muted/30 transition-colors">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <span className="text-xl">{p.emoji}</span>
+                      {p.image ? (
+                        <img src={p.image} alt={p.name} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+                      ) : (
+                        <span className="text-xl w-10 h-10 flex items-center justify-center">{p.emoji}</span>
+                      )}
                       <div>
                         <p className="font-medium text-foreground text-sm">{p.name}</p>
                         <p className="text-xs text-muted-foreground line-clamp-1">{p.description}</p>
