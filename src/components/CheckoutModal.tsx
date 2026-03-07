@@ -1,4 +1,4 @@
-import { X, Send, MapPin, User, CreditCard, Home, ChevronRight, ShoppingBag, ArrowLeft } from 'lucide-react';
+import { X, Send, MapPin, User, CreditCard, Home, ChevronRight, ShoppingBag, ArrowLeft, Trash2 } from 'lucide-react';
 import { useCartStore } from '@/store/cart-store';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,7 +7,7 @@ type DeliveryZone = 'residence' | 'dois_unidos' | '';
 type Step = 1 | 2;
 
 export default function CheckoutModal() {
-  const { items, isCheckoutOpen, closeCheckout, getTotalPrice, clearCart } = useCartStore();
+  const { items, isCheckoutOpen, closeCheckout, getTotalPrice, clearCart, removeItem } = useCartStore();
   const [step, setStep] = useState<Step>(1);
   const [nome, setNome] = useState('');
   const [endereco, setEndereco] = useState('');
@@ -161,7 +161,7 @@ export default function CheckoutModal() {
                 {/* Items */}
                 <div className="space-y-2">
                   {items.map((item) => (
-                    <div key={item.id} className="flex items-start gap-3 p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)]">
+                    <div key={item.id} className="relative flex items-start gap-3 p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)]">
                       <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-[var(--bg-secondary)] border border-[var(--border-color)]">
                         <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                       </div>
@@ -178,6 +178,13 @@ export default function CheckoutModal() {
                           <p className="text-[11px] text-[var(--text-muted)] mt-0.5">+ {item.selectedAcomp.join(', ')}</p>
                         ) : null}
                       </div>
+                      <button
+                        onClick={() => removeItem(item.id)}
+                        className="absolute bottom-2 right-2 p-1 rounded-lg text-red-400 hover:text-red-500 hover:bg-red-500/10 transition-colors"
+                        aria-label="Remover item"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </div>
                   ))}
                 </div>
