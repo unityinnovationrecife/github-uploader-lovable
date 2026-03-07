@@ -7,7 +7,7 @@ type DeliveryZone = 'residence' | 'dois_unidos' | '';
 type Step = 1 | 2;
 
 export default function CheckoutModal() {
-  const { items, isCheckoutOpen, closeCheckout, getTotalPrice, clearCart } = useCartStore();
+  const { items, isCheckoutOpen, closeCheckout, getTotalPrice, clearCart, removeItem } = useCartStore();
   const [step, setStep] = useState<Step>(1);
   const [nome, setNome] = useState('');
   const [endereco, setEndereco] = useState('');
