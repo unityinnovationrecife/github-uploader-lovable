@@ -2,6 +2,7 @@ import { ShoppingCart, Sun, Moon } from 'lucide-react';
 import { useCartStore } from '@/store/cart-store';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
+import logo from '@/assets/logo.png';
 
 export default function Header() {
   const { toggleCart, getTotalItems } = useCartStore();
