@@ -32,6 +32,7 @@ export default function Header() {
   const [totalItems, setTotalItems] = useState(0);
   const [mounted, setMounted] = useState(false);
   const [storeStatus, setStoreStatus] = useState(getStoreStatus());
+  const [showBanner, setShowBanner] = useState(true);
 
   useEffect(() => {
     setMounted(true);
