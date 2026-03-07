@@ -84,8 +84,8 @@ export default function CartSidebar() {
                   className="flex items-start gap-3 p-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] group hover:border-orange-500/30 transition-all"
                 >
                   {/* Emoji */}
-                  <div className="w-12 h-12 rounded-xl bg-[var(--bg-secondary)] flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-xl">{item.emoji}</span>
+                  <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 mt-0.5 bg-[var(--bg-secondary)] border border-[var(--border-color)]">
+                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                   </div>
 
                   {/* Info */}
