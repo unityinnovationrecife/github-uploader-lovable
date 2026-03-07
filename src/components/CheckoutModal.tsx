@@ -2,6 +2,7 @@ import { X, Send, MapPin, User, CreditCard, Home, ChevronRight, ShoppingBag, Arr
 import { useCartStore } from '@/store/cart-store';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 
 type DeliveryZone = 'residence' | 'dois_unidos' | '';
 type Step = 1 | 2;
