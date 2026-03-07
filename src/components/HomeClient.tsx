@@ -9,7 +9,7 @@ import CheckoutModal from '@/components/CheckoutModal';
 import PastelFlavorModal from '@/components/PastelFlavorModal';
 import Footer from '@/components/Footer';
 import { Category, Product } from '@/types';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function HomeClient() {
   const [products, setProducts] = useState<Product[]>([]);

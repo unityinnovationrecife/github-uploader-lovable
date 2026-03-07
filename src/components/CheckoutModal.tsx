@@ -1,7 +1,7 @@
 import { X, Send, MapPin, User, CreditCard, Home } from 'lucide-react';
 import { useCartStore } from '@/store/cart-store';
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
 type DeliveryZone = 'residence' | 'dois_unidos' | '';
 
