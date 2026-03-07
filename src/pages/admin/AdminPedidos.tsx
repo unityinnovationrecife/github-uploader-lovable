@@ -227,7 +227,7 @@ export default function AdminPedidos() {
             </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
