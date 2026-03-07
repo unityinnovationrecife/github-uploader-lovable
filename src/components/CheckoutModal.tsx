@@ -108,6 +108,11 @@ export default function CheckoutModal() {
     clearCart();
     closeCheckout();
     setNome(''); setRua(''); setNumero(''); setReferencia(''); setPagamento(''); setZone('');
+
+    // Redirecionar para tela de acompanhamento
+    if (savedOrderId) {
+      navigate(`/pedido/${savedOrderId}`);
+    }
   };
 
   return (
