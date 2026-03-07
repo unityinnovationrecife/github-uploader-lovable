@@ -35,7 +35,7 @@ export default function CartFloatingButton() {
     >
       <div className="flex items-center gap-3">
         <div className="relative">
-          <div className="absolute inset-0 rounded-full bg-white/20 animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite]" />
+          <div className="absolute inset-0 rounded-full bg-white/20 animate-[ping_4s_cubic-bezier(0,0,0.2,1)_infinite]" />
           <ShoppingCart className="w-6 h-6 relative" />
           <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-white text-orange-600 text-[10px] font-bold flex items-center justify-center shadow-md">
             {totalItems}
