@@ -1,6 +1,7 @@
 import { X, Plus, Minus, Trash2, ShoppingBag } from 'lucide-react';
 import { useCartStore } from '@/store/cart-store';
 import { useEffect, useState } from 'react';
+import logo from '@/assets/logo.png';
 
 export default function CartSidebar() {
   const {
@@ -49,9 +50,7 @@ export default function CartSidebar() {
           {/* Header */}
           <div className="flex items-center justify-between p-5 border-b border-[var(--border-color)]">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
-                <ShoppingBag className="w-5 h-5 text-white" />
-              </div>
+              <img src={logo} alt="G&S Salgados" className="h-10 w-auto object-contain" />
               <div>
                 <h2 className="text-lg font-bold text-[var(--text-primary)]">Seu Carrinho</h2>
                 <p className="text-xs text-[var(--text-muted)]">
