@@ -94,30 +94,50 @@ export default function AdminProdutos() {
     e.preventDefault();
     setSaving(true);
 
-    const flavors = flavorsText
-      ? flavorsText.split(',').map(s => s.trim()).filter(Boolean)
-      : null;
+    try {
+      let imageUrl = form.image;
 
-    const payload = {
-      ...form,
-      available_flavors: flavors,
-      price: Number(form.price),
-    };
+      // Upload image file if selected
+      if (imageFile) {
+        setUploadingImage(true);
+        imageUrl = await uploadImage(imageFile);
+        setUploadingImage(false);
+      }
 
-    let error;
-    if (editingId) {
-      ({ error } = await supabase.from('products').update(payload).eq('id', editingId));
-    } else {
-      const id = form.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + Date.now();
-      ({ error } = await supabase.from('products').insert({ ...payload, id }));
-    }
+      if (!imageUrl) {
+        toast({ title: 'Adicione uma imagem ao produto', variant: 'destructive' });
+        setSaving(false);
+        return;
+      }
 
-    if (error) {
-      toast({ title: 'Erro ao salvar', description: error.message, variant: 'destructive' });
-    } else {
-      toast({ title: editingId ? 'Produto atualizado!' : 'Produto criado!' });
-      setShowForm(false);
-      fetchProducts();
+      const flavors = flavorsText
+        ? flavorsText.split(',').map(s => s.trim()).filter(Boolean)
+        : null;
+
+      const payload = {
+        ...form,
+        image: imageUrl,
+        available_flavors: flavors,
+        price: Number(form.price),
+      };
+
+      let error;
+      if (editingId) {
+        ({ error } = await supabase.from('products').update(payload).eq('id', editingId));
+      } else {
+        const id = form.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + Date.now();
+        ({ error } = await supabase.from('products').insert({ ...payload, id }));
+      }
+
+      if (error) {
+        toast({ title: 'Erro ao salvar', description: error.message, variant: 'destructive' });
+      } else {
+        toast({ title: editingId ? 'Produto atualizado!' : 'Produto criado!' });
+        setShowForm(false);
+        fetchProducts();
+      }
+    } catch (err: any) {
+      toast({ title: 'Erro ao fazer upload da imagem', description: err.message, variant: 'destructive' });
     }
     setSaving(false);
   };
