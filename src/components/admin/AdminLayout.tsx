@@ -46,7 +46,9 @@ export default function AdminLayout() {
       {/* Sidebar Desktop */}
       <aside className="hidden md:flex flex-col w-60 bg-card border-r border-border">
         <div className="p-4 border-b border-border flex items-center justify-center">
-          <img src={logo} alt="G&S Salgados" className="h-16 w-auto object-contain" />
+          <a href="/" title="Voltar para a loja">
+            <img src={logo} alt="G&S Salgados" className="h-16 w-auto object-contain hover:opacity-80 transition-opacity" />
+          </a>
         </div>
 
         <nav className="flex-1 p-4 space-y-1">
