@@ -139,50 +139,52 @@ export default function PastelFlavorModal({ product, isOpen, onClose, acompanham
             {/* Flavors */}
             <div className="p-5">
               {allowDuplicates ? (
-                product.availableFlavors?.map((flavor) => {
-                  const count = flavorCounts[flavor] || 0;
-                  return (
-                    <div
-                      key={flavor}
-                      className={`flex items-center justify-between px-4 py-3 rounded-xl border transition-all duration-200 ${
-                        count > 0
-                          ? 'bg-gradient-to-r from-orange-500/10 to-red-500/10 border-orange-500/50'
-                          : 'bg-[var(--bg-primary)] border-[var(--border-color)]'
-                      }`}
-                    >
-                      <span className={`text-sm font-medium ${count > 0 ? 'text-orange-500' : 'text-[var(--text-secondary)]'}`}>
-                        {flavor}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => decrementFlavor(flavor)}
-                          disabled={count === 0}
-                          className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
-                            count > 0
-                              ? 'bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-primary)] hover:border-orange-500/50 active:scale-90'
-                              : 'bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-muted)] opacity-40 cursor-not-allowed'
-                          }`}
-                        >
-                          <Minus className="w-3.5 h-3.5" />
-                        </button>
-                        <span className="w-6 text-center text-sm font-bold text-[var(--text-primary)]">
-                          {count}
+                <div className="grid grid-cols-2 gap-2">
+                  {product.availableFlavors?.map((flavor) => {
+                    const count = flavorCounts[flavor] || 0;
+                    return (
+                      <div
+                        key={flavor}
+                        className={`flex items-center justify-between px-3 py-3 rounded-xl border transition-all duration-200 ${
+                          count > 0
+                            ? 'bg-gradient-to-r from-orange-500/10 to-red-500/10 border-orange-500/50'
+                            : 'bg-[var(--bg-primary)] border-[var(--border-color)]'
+                        }`}
+                      >
+                        <span className={`text-sm font-medium ${count > 0 ? 'text-orange-500' : 'text-[var(--text-secondary)]'}`}>
+                          {flavor}
                         </span>
-                        <button
-                          onClick={() => incrementFlavor(flavor)}
-                          disabled={totalSelected >= maxFlavors}
-                          className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all active:scale-90 ${
-                            totalSelected >= maxFlavors
-                              ? 'bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-muted)] opacity-40 cursor-not-allowed'
-                              : 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg shadow-orange-500/25'
-                          }`}
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                        </button>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => decrementFlavor(flavor)}
+                            disabled={count === 0}
+                            className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${
+                              count > 0
+                                ? 'bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-primary)] hover:border-orange-500/50 active:scale-90'
+                                : 'bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-muted)] opacity-40 cursor-not-allowed'
+                            }`}
+                          >
+                            <Minus className="w-3 h-3" />
+                          </button>
+                          <span className="w-5 text-center text-sm font-bold text-[var(--text-primary)]">
+                            {count}
+                          </span>
+                          <button
+                            onClick={() => incrementFlavor(flavor)}
+                            disabled={totalSelected >= maxFlavors}
+                            className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all active:scale-90 ${
+                              totalSelected >= maxFlavors
+                                ? 'bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-muted)] opacity-40 cursor-not-allowed'
+                                : 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg shadow-orange-500/25'
+                            }`}
+                          >
+                            <Plus className="w-3 h-3" />
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })
+                    );
+                  })}
+                </div>
               ) : (
                 <div className="grid grid-cols-2 gap-2">
                   {product.availableFlavors?.map((flavor) => {
