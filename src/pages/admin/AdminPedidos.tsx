@@ -78,9 +78,15 @@ export default function AdminPedidos() {
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Pedidos</h1>
-        <p className="text-muted-foreground text-sm">{orders.length} pedidos no total</p>
+      <div className="mb-8 flex items-end justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Pedidos</h1>
+          <p className="text-muted-foreground text-sm mt-1">{orders.length} pedido{orders.length !== 1 ? 's' : ''} no total</p>
+        </div>
+        <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-primary/10 text-primary border border-primary/20 px-3 py-1.5 rounded-full">
+          <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+          Ao vivo
+        </span>
       </div>
 
       {loading ? (
