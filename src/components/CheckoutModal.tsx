@@ -273,17 +273,38 @@ export default function CheckoutModal() {
                 <div>
                   <label className="flex items-center gap-2 text-sm font-medium text-[var(--text-muted)] mb-2">
                     <MapPin className="w-4 h-4" />
-                    {zone === 'residence' ? 'Bloco e Apartamento' : 'Rua, Número, Referência'}
+                    {zone === 'residence' ? 'Bloco e Apartamento' : 'Endereço'}
                   </label>
-                  <input
-                    type="text"
-                    value={endereco}
-                    onChange={(e) => setEndereco(e.target.value)}
-                    required
-                    placeholder={zone === 'residence' ? 'Ex: Bloco A, Apto 101' : 'Rua, número, refer.'}
-                    disabled={!zone}
-                    className="w-full px-4 py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  />
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      value={rua}
+                      onChange={(e) => setRua(e.target.value)}
+                      required
+                      placeholder={zone === 'residence' ? 'Bloco' : 'Rua'}
+                      disabled={!zone}
+                      className="w-full px-4 py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    />
+                    <input
+                      type="text"
+                      value={numero}
+                      onChange={(e) => setNumero(e.target.value)}
+                      required
+                      placeholder={zone === 'residence' ? 'Apartamento' : 'Número'}
+                      disabled={!zone}
+                      className="w-full px-4 py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    />
+                    {zone !== 'residence' && (
+                      <input
+                        type="text"
+                        value={referencia}
+                        onChange={(e) => setReferencia(e.target.value)}
+                        placeholder="Referência (opcional)"
+                        disabled={!zone}
+                        className="w-full px-4 py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      />
+                    )}
+                  </div>
                 </div>
 
                 {/* Pagamento */}
