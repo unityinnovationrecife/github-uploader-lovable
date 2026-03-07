@@ -59,6 +59,8 @@ export default function AdminProdutos() {
   const openNew = () => {
     setForm(emptyForm());
     setFlavorsText('');
+    setImageFile(null);
+    setImagePreview('');
     setEditingId(null);
     setShowForm(true);
   };
@@ -66,8 +68,26 @@ export default function AdminProdutos() {
   const openEdit = (p: Product) => {
     setForm({ ...p });
     setFlavorsText((p.available_flavors || []).join(', '));
+    setImageFile(null);
+    setImagePreview(p.image || '');
     setEditingId(p.id);
     setShowForm(true);
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const uploadImage = async (file: File): Promise<string> => {
+    const ext = file.name.split('.').pop();
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error } = await supabase.storage.from('product-images').upload(path, file, { upsert: true });
+    if (error) throw error;
+    const { data } = supabase.storage.from('product-images').getPublicUrl(path);
+    return data.publicUrl;
   };
 
   const handleSave = async (e: React.FormEvent) => {
