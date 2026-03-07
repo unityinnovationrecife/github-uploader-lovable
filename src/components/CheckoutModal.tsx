@@ -9,6 +9,7 @@ type Step = 1 | 2;
 
 export default function CheckoutModal() {
   const { items, isCheckoutOpen, closeCheckout, getTotalPrice, clearCart, removeItem } = useCartStore();
+  const navigate = useNavigate();
   const [step, setStep] = useState<Step>(1);
   const [nome, setNome] = useState('');
   const [rua, setRua] = useState('');
