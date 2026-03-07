@@ -38,7 +38,7 @@ export default function HomeClient() {
           description: p.description,
           price: Number(p.price),
           image: p.image,
-          category: p.category,
+          category: p.category as Product['category'],
           emoji: p.emoji,
           hasFlavors: p.has_flavors || false,
           maxFlavors: p.max_flavors || undefined,
