@@ -70,8 +70,9 @@ export default function AdminAcompanhamentos() {
   };
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+    <div className="flex flex-col h-full">
+      {/* Header fixo */}
+      <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-border bg-background sticky top-0 z-10">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Acompanhamentos</h1>
           <p className="text-muted-foreground text-sm">{items.length} acompanhamentos</p>
@@ -85,37 +86,40 @@ export default function AdminAcompanhamentos() {
         </button>
       </div>
 
-      {loading ? (
-        <div className="flex justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
-      ) : (
-        <div className="bg-card border border-border rounded-2xl overflow-hidden">
-          {items.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">Nenhum acompanhamento ainda.</div>
-          ) : (
-            <div className="divide-y divide-border">
-              {items.map((item) => (
-                <div key={item.id} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors">
-                  <GripVertical className="w-4 h-4 text-muted-foreground/40 flex-shrink-0" />
-                  <div className="flex-1">
-                    <p className="font-medium text-foreground text-sm">{item.name}</p>
-                    <p className="text-xs text-muted-foreground">Ordem: {item.display_order}</p>
+      {/* Lista com scroll */}
+      <div className="flex-1 overflow-auto p-6">
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        ) : (
+          <div className="bg-card border border-border rounded-2xl overflow-hidden">
+            {items.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">Nenhum acompanhamento ainda.</div>
+            ) : (
+              <div className="divide-y divide-border">
+                {items.map((item) => (
+                  <div key={item.id} className="flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors">
+                    <GripVertical className="w-4 h-4 text-muted-foreground/40 flex-shrink-0" />
+                    <div className="flex-1">
+                      <p className="font-medium text-foreground text-sm">{item.name}</p>
+                      <p className="text-xs text-muted-foreground">Ordem: {item.display_order}</p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button onClick={() => openEdit(item)} className="p-2 rounded-lg hover:bg-muted transition-colors">
+                        <Pencil className="w-4 h-4 text-muted-foreground" />
+                      </button>
+                      <button onClick={() => handleDelete(item.id, item.name)} className="p-2 rounded-lg hover:bg-destructive/10 transition-colors">
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <button onClick={() => openEdit(item)} className="p-2 rounded-lg hover:bg-muted transition-colors">
-                      <Pencil className="w-4 h-4 text-muted-foreground" />
-                    </button>
-                    <button onClick={() => handleDelete(item.id, item.name)} className="p-2 rounded-lg hover:bg-destructive/10 transition-colors">
-                      <Trash2 className="w-4 h-4 text-destructive" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Form Modal */}
       {showForm && (
