@@ -50,7 +50,7 @@ export default function ProductCard({ product, onSelectFlavors }: ProductCardPro
 
   return (
     <div
-      className={`group relative bg-[var(--bg-card)] border rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-500 hover:-translate-y-1 ${
+      className={`group relative bg-[var(--bg-card)] border rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-500 hover:-translate-y-1 flex flex-col h-full ${
         isCombo
           ? 'border-orange-500/30 hover:border-orange-500/50 hover:shadow-orange-500/10'
           : 'border-[var(--border-color)] hover:border-orange-500/30 hover:shadow-orange-500/5'
