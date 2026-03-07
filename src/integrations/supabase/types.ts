@@ -130,6 +130,7 @@ export type Database = {
           description: string
           display_order: number
           emoji: string
+          has_acomp: boolean
           has_flavors: boolean
           id: string
           image: string
@@ -145,6 +146,7 @@ export type Database = {
           description: string
           display_order?: number
           emoji?: string
+          has_acomp?: boolean
           has_flavors?: boolean
           id: string
           image: string
@@ -160,6 +162,7 @@ export type Database = {
           description?: string
           display_order?: number
           emoji?: string
+          has_acomp?: boolean
           has_flavors?: boolean
           id?: string
           image?: string
