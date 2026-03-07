@@ -50,6 +50,8 @@ export default function CheckoutModal() {
     e.preventDefault();
     if (!zone) { alert('Por favor, selecione seu bairro/condomínio para entrega.'); return; }
 
+    let savedOrderId: string | null = null;
+
     try {
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
@@ -67,6 +69,7 @@ export default function CheckoutModal() {
         .single();
 
       if (!orderError && orderData) {
+        savedOrderId = orderData.id;
         const orderItems = items.map((item) => ({
           order_id: orderData.id,
           product_id: item.id,
@@ -109,7 +112,6 @@ export default function CheckoutModal() {
     closeCheckout();
     setNome(''); setRua(''); setNumero(''); setReferencia(''); setPagamento(''); setZone('');
 
-    // Redirecionar para tela de acompanhamento
     if (savedOrderId) {
       navigate(`/pedido/${savedOrderId}`);
     }
