@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Pencil, Trash2, X, Check, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Check, Loader2, ImagePlus, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 type Product = {
