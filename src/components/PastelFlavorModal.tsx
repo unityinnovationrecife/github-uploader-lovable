@@ -137,7 +137,7 @@ export default function PastelFlavorModal({ product, isOpen, onClose, acompanham
             </div>
 
             {/* Flavors */}
-            <div className="p-5 space-y-2">
+            <div className="p-5">
               {allowDuplicates ? (
                 product.availableFlavors?.map((flavor) => {
                   const count = flavorCounts[flavor] || 0;
