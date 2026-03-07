@@ -266,14 +266,6 @@ export default function AdminProdutos() {
                     className="w-full px-3 py-2 rounded-xl bg-background border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm"
                   />
                 </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground mb-1 block">Emoji</label>
-                  <input
-                    value={form.emoji}
-                    onChange={e => setForm({ ...form, emoji: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-background border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm"
-                  />
-                </div>
               </div>
 
               <div>
