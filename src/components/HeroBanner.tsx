@@ -1,4 +1,5 @@
 import { Flame, ChevronRight } from 'lucide-react';
+import heroLogo from '@/assets/hero-logo.png';
 
 export default function HeroBanner() {
   const scrollToProducts = () => {
