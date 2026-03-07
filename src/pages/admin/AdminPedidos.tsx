@@ -154,7 +154,7 @@ export default function AdminPedidos() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-semibold text-foreground text-sm">{order.customer_name}</p>
-                      <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border ${statusCfg.color}`}>
+                      <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border ${STATUS_BADGE[order.status] || STATUS_BADGE.pending}`}>
                         <StatusIcon className="w-3 h-3" />
                         {statusCfg.label}
                       </span>
