@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, ChevronDown, ChevronUp, Clock, CheckCircle, XCircle, Truck, ChefHat } from 'lucide-react';
+import { Loader2, ChevronDown, ChevronUp, ChevronRight, Clock, CheckCircle, XCircle, Truck, ChefHat } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 type OrderItem = {
@@ -26,14 +26,26 @@ type Order = {
   items?: OrderItem[];
 };
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ElementType }> = {
-  pending: { label: 'Pendente', color: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/30', icon: Clock },
-  confirmed: { label: 'Confirmado', color: 'bg-blue-500/10 text-blue-600 border-blue-500/30', icon: CheckCircle },
-  preparing: { label: 'Preparando', color: 'bg-orange-500/10 text-orange-600 border-orange-500/30', icon: ChefHat },
-  delivering: { label: 'Em entrega', color: 'bg-purple-500/10 text-purple-600 border-purple-500/30', icon: Truck },
-  delivered: { label: 'Entregue', color: 'bg-green-500/10 text-green-600 border-green-500/30', icon: CheckCircle },
-  cancelled: { label: 'Cancelado', color: 'bg-red-500/10 text-red-600 border-red-500/30', icon: XCircle },
+const STATUS_CONFIG: Record<string, { label: string; activeColor: string; activeBg: string; icon: React.ElementType }> = {
+  pending:   { label: 'Pendente',   activeColor: 'text-yellow-600', activeBg: 'bg-yellow-500',  icon: Clock },
+  confirmed: { label: 'Confirmado', activeColor: 'text-blue-600',   activeBg: 'bg-blue-500',    icon: CheckCircle },
+  preparing: { label: 'Preparando', activeColor: 'text-orange-600', activeBg: 'bg-orange-500',  icon: ChefHat },
+  delivering:{ label: 'Em entrega', activeColor: 'text-purple-600', activeBg: 'bg-purple-500',  icon: Truck },
+  delivered: { label: 'Entregue',   activeColor: 'text-green-600',  activeBg: 'bg-green-500',   icon: CheckCircle },
+  cancelled: { label: 'Cancelado',  activeColor: 'text-red-600',    activeBg: 'bg-red-500',     icon: XCircle },
 };
+
+// Badge color for the order header
+const STATUS_BADGE: Record<string, string> = {
+  pending:    'bg-yellow-500/10 text-yellow-600 border-yellow-500/30',
+  confirmed:  'bg-blue-500/10 text-blue-600 border-blue-500/30',
+  preparing:  'bg-orange-500/10 text-orange-600 border-orange-500/30',
+  delivering: 'bg-purple-500/10 text-purple-600 border-purple-500/30',
+  delivered:  'bg-green-500/10 text-green-600 border-green-500/30',
+  cancelled:  'bg-red-500/10 text-red-600 border-red-500/30',
+};
+
+const STATUS_FLOW = ['pending', 'confirmed', 'preparing', 'delivering', 'delivered'];
 
 export default function AdminPedidos() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -142,7 +154,7 @@ export default function AdminPedidos() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-semibold text-foreground text-sm">{order.customer_name}</p>
-                      <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border ${statusCfg.color}`}>
+                      <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border ${STATUS_BADGE[order.status] || STATUS_BADGE.pending}`}>
                         <StatusIcon className="w-3 h-3" />
                         {statusCfg.label}
                       </span>
@@ -200,26 +212,51 @@ export default function AdminPedidos() {
 
                     {/* Status Update */}
                     <div>
-                      <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Atualizar Status</p>
-                      <div className="flex flex-wrap gap-2">
-                        {Object.entries(STATUS_CONFIG).map(([key, cfg]) => {
+                      <p className="text-xs font-semibold text-muted-foreground uppercase mb-3">Atualizar Status</p>
+
+                      {/* Pipeline de status */}
+                      <div className="flex items-center gap-1 mb-3 flex-wrap">
+                        {STATUS_FLOW.map((key, idx) => {
+                          const cfg = STATUS_CONFIG[key];
                           const Icon = cfg.icon;
+                          const isActive = order.status === key;
+                          const isPast = STATUS_FLOW.indexOf(order.status) > idx;
                           return (
-                            <button
-                              key={key}
-                              onClick={() => updateStatus(order.id, key)}
-                              className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-all ${
-                                order.status === key
-                                  ? cfg.color + ' font-semibold'
-                                  : 'border-border text-muted-foreground hover:bg-muted'
-                              }`}
-                            >
-                              <Icon className="w-3 h-3" />
-                              {cfg.label}
-                            </button>
+                            <div key={key} className="flex items-center gap-1">
+                              <button
+                                onClick={() => updateStatus(order.id, key)}
+                                title={cfg.label}
+                                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-medium transition-all ${
+                                  isActive
+                                    ? `${cfg.activeBg} text-white border-transparent shadow-sm`
+                                    : isPast
+                                    ? 'bg-muted/60 text-muted-foreground border-border line-through'
+                                    : 'bg-background text-muted-foreground border-border hover:border-primary/40 hover:text-foreground'
+                                }`}
+                              >
+                                <Icon className="w-3.5 h-3.5" />
+                                {cfg.label}
+                              </button>
+                              {idx < STATUS_FLOW.length - 1 && (
+                                <ChevronRight className={`w-3.5 h-3.5 flex-shrink-0 ${isPast || isActive ? 'text-muted-foreground' : 'text-border'}`} />
+                              )}
+                            </div>
                           );
                         })}
                       </div>
+
+                      {/* Cancelar separado */}
+                      <button
+                        onClick={() => updateStatus(order.id, 'cancelled')}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all ${
+                          order.status === 'cancelled'
+                            ? 'bg-red-500 text-white border-transparent'
+                            : 'border-red-300 text-red-500 hover:bg-red-500/10'
+                        }`}
+                      >
+                        <XCircle className="w-3.5 h-3.5" />
+                        Cancelar pedido
+                      </button>
                     </div>
                   </div>
                 )}
