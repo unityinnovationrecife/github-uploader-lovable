@@ -13,10 +13,13 @@ export default function CheckoutModal() {
   const [rua, setRua] = useState('');
   const [numero, setNumero] = useState('');
   const [referencia, setReferencia] = useState('');
-  const endereco = zone === 'residence' ? `${rua}, ${numero}` : [rua, numero, referencia].filter(Boolean).join(', ');
   const [pagamento, setPagamento] = useState('');
   const [zone, setZone] = useState<DeliveryZone>('');
   const [mounted, setMounted] = useState(false);
+
+  const endereco = zone === 'residence'
+    ? [rua, numero].filter(Boolean).join(', ')
+    : [rua, numero, referencia].filter(Boolean).join(', ');
 
   useEffect(() => { setMounted(true); }, []);
 
