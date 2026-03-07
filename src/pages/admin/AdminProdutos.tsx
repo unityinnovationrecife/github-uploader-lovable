@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Pencil, Trash2, X, Check, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Check, Loader2, ImagePlus, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 type Product = {
@@ -42,6 +42,10 @@ export default function AdminProdutos() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm());
   const [flavorsText, setFlavorsText] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const fetchProducts = async () => {
@@ -55,6 +59,8 @@ export default function AdminProdutos() {
   const openNew = () => {
     setForm(emptyForm());
     setFlavorsText('');
+    setImageFile(null);
+    setImagePreview('');
     setEditingId(null);
     setShowForm(true);
   };
@@ -62,38 +68,76 @@ export default function AdminProdutos() {
   const openEdit = (p: Product) => {
     setForm({ ...p });
     setFlavorsText((p.available_flavors || []).join(', '));
+    setImageFile(null);
+    setImagePreview(p.image || '');
     setEditingId(p.id);
     setShowForm(true);
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const uploadImage = async (file: File): Promise<string> => {
+    const ext = file.name.split('.').pop();
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error } = await supabase.storage.from('product-images').upload(path, file, { upsert: true });
+    if (error) throw error;
+    const { data } = supabase.storage.from('product-images').getPublicUrl(path);
+    return data.publicUrl;
   };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
 
-    const flavors = flavorsText
-      ? flavorsText.split(',').map(s => s.trim()).filter(Boolean)
-      : null;
+    try {
+      let imageUrl = form.image;
 
-    const payload = {
-      ...form,
-      available_flavors: flavors,
-      price: Number(form.price),
-    };
+      // Upload image file if selected
+      if (imageFile) {
+        setUploadingImage(true);
+        imageUrl = await uploadImage(imageFile);
+        setUploadingImage(false);
+      }
 
-    let error;
-    if (editingId) {
-      ({ error } = await supabase.from('products').update(payload).eq('id', editingId));
-    } else {
-      const id = form.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + Date.now();
-      ({ error } = await supabase.from('products').insert({ ...payload, id }));
-    }
+      if (!imageUrl) {
+        toast({ title: 'Adicione uma imagem ao produto', variant: 'destructive' });
+        setSaving(false);
+        return;
+      }
 
-    if (error) {
-      toast({ title: 'Erro ao salvar', description: error.message, variant: 'destructive' });
-    } else {
-      toast({ title: editingId ? 'Produto atualizado!' : 'Produto criado!' });
-      setShowForm(false);
-      fetchProducts();
+      const flavors = flavorsText
+        ? flavorsText.split(',').map(s => s.trim()).filter(Boolean)
+        : null;
+
+      const payload = {
+        ...form,
+        image: imageUrl,
+        available_flavors: flavors,
+        price: Number(form.price),
+      };
+
+      let error;
+      if (editingId) {
+        ({ error } = await supabase.from('products').update(payload).eq('id', editingId));
+      } else {
+        const id = form.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + Date.now();
+        ({ error } = await supabase.from('products').insert({ ...payload, id }));
+      }
+
+      if (error) {
+        toast({ title: 'Erro ao salvar', description: error.message, variant: 'destructive' });
+      } else {
+        toast({ title: editingId ? 'Produto atualizado!' : 'Produto criado!' });
+        setShowForm(false);
+        fetchProducts();
+      }
+    } catch (err: any) {
+      toast({ title: 'Erro ao fazer upload da imagem', description: err.message, variant: 'destructive' });
     }
     setSaving(false);
   };
@@ -146,7 +190,11 @@ export default function AdminProdutos() {
                 <tr key={p.id} className="hover:bg-muted/30 transition-colors">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <span className="text-xl">{p.emoji}</span>
+                      {p.image ? (
+                        <img src={p.image} alt={p.name} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+                      ) : (
+                        <span className="text-xl w-10 h-10 flex items-center justify-center">{p.emoji}</span>
+                      )}
                       <div>
                         <p className="font-medium text-foreground text-sm">{p.name}</p>
                         <p className="text-xs text-muted-foreground line-clamp-1">{p.description}</p>
@@ -248,13 +296,42 @@ export default function AdminProdutos() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground mb-1 block">URL da Imagem *</label>
+                  <label className="text-sm font-medium text-muted-foreground mb-1 block">Imagem do Produto *</label>
+                  {/* Image Preview */}
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="relative w-full aspect-video rounded-xl border-2 border-dashed border-border bg-muted/30 hover:bg-muted/60 transition-all cursor-pointer overflow-hidden flex items-center justify-center"
+                  >
+                    {imagePreview ? (
+                      <>
+                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <Upload className="w-6 h-6 text-white" />
+                          <span className="text-white text-sm ml-2">Trocar imagem</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                        <ImagePlus className="w-8 h-8" />
+                        <span className="text-xs text-center">Clique para selecionar<br />JPG, PNG, WEBP</span>
+                      </div>
+                    )}
+                    {uploadingImage && (
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                        <Loader2 className="w-6 h-6 text-white animate-spin" />
+                      </div>
+                    )}
+                  </div>
                   <input
-                    required value={form.image}
-                    onChange={e => setForm({ ...form, image: e.target.value })}
-                    placeholder="https://..."
-                    className="w-full px-3 py-2 rounded-xl bg-background border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm"
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageChange}
                   />
+                  {imageFile && (
+                    <p className="text-xs text-muted-foreground mt-1 truncate">{imageFile.name}</p>
+                  )}
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground mb-1 block">Ordem de Exibição</label>
