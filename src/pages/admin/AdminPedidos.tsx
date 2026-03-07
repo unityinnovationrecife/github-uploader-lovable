@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, ChevronDown, ChevronUp, Clock, CheckCircle, XCircle, Truck } from 'lucide-react';
+import { Loader2, ChevronDown, ChevronUp, Clock, CheckCircle, XCircle, Truck, ChefHat } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 type OrderItem = {
