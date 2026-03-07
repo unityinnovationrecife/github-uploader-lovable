@@ -1,4 +1,4 @@
-import { ShoppingCart, Sun, Moon, Clock, Truck } from 'lucide-react';
+import { ShoppingCart, Sun, Moon, Clock, Truck, X } from 'lucide-react';
 import { useCartStore } from '@/store/cart-store';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
