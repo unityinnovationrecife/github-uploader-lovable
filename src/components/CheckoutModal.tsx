@@ -1,4 +1,4 @@
-import { X, Send, MapPin, User, CreditCard, Home, ChevronRight, ShoppingBag, ArrowLeft, Trash2 } from 'lucide-react';
+import { X, Send, MapPin, User, CreditCard, Home, ChevronRight, ShoppingBag, ArrowLeft, Trash2, Banknote, QrCode } from 'lucide-react';
 import { useCartStore } from '@/store/cart-store';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -313,18 +313,25 @@ export default function CheckoutModal() {
                     <CreditCard className="w-4 h-4" />
                     Forma de Pagamento
                   </label>
-                  <select
-                    value={pagamento}
-                    onChange={(e) => setPagamento(e.target.value)}
-                    required
-                    className="w-full px-4 py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/25 transition-all appearance-none"
-                  >
-                    <option value="" disabled>Selecione...</option>
-                    <option value="PIX">PIX</option>
-                    <option value="Dinheiro">Dinheiro</option>
-                    <option value="Cartão de Crédito">Cartão de Crédito</option>
-                    <option value="Cartão de Débito">Cartão de Débito</option>
-                  </select>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { value: 'PIX', label: 'PIX', icon: <QrCode className="w-4 h-4" /> },
+                      { value: 'Dinheiro', label: 'Dinheiro', icon: <Banknote className="w-4 h-4" /> },
+                      { value: 'Cartão de Crédito', label: 'Crédito', icon: <CreditCard className="w-4 h-4" /> },
+                      { value: 'Cartão de Débito', label: 'Débito', icon: <CreditCard className="w-4 h-4" /> },
+                    ].map(({ value, label, icon }) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setPagamento(value)}
+                        className={`flex items-center gap-2 px-3 py-3 rounded-xl border transition-all text-sm font-medium ${pagamento === value ? 'border-orange-500 bg-orange-500/10 text-orange-500' : 'border-[var(--border-color)] bg-[var(--bg-primary)] text-[var(--text-primary)] hover:border-orange-500/40'}`}
+                      >
+                        {icon}
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  <input type="hidden" value={pagamento} required />
                 </div>
 
                 {/* Total com entrega */}
