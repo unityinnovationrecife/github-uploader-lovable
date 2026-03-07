@@ -15,6 +15,7 @@ type Product = {
   available_flavors: string[] | null;
   max_flavors: number | null;
   allow_duplicate_flavors: boolean;
+  has_acomp: boolean;
   display_order: number;
 };
 
@@ -31,6 +32,7 @@ const emptyForm = (): Omit<Product, 'id'> => ({
   available_flavors: null,
   max_flavors: null,
   allow_duplicate_flavors: false,
+  has_acomp: false,
   display_order: 0,
 });
 
@@ -348,6 +350,15 @@ export default function AdminProdutos() {
               </div>
 
               <div className="bg-muted/50 rounded-xl p-4 space-y-3">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox" checked={form.has_acomp}
+                    onChange={e => setForm({ ...form, has_acomp: e.target.checked })}
+                    className="rounded accent-primary"
+                  />
+                  <span className="text-sm font-medium text-foreground">Aceita acompanhamentos?</span>
+                </label>
+
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox" checked={form.has_flavors}

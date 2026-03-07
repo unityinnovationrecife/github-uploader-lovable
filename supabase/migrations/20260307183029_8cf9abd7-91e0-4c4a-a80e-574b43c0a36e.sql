@@ -1,0 +1,1 @@
+ALTER TABLE public.products ADD COLUMN has_acomp boolean NOT NULL DEFAULT false;
