@@ -352,6 +352,15 @@ export default function AdminProdutos() {
               <div className="bg-muted/50 rounded-xl p-4 space-y-3">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
+                    type="checkbox" checked={form.has_acomp}
+                    onChange={e => setForm({ ...form, has_acomp: e.target.checked })}
+                    className="rounded accent-primary"
+                  />
+                  <span className="text-sm font-medium text-foreground">Aceita acompanhamentos?</span>
+                </label>
+
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
                     type="checkbox" checked={form.has_flavors}
                     onChange={e => setForm({ ...form, has_flavors: e.target.checked })}
                     className="rounded accent-primary"
