@@ -14,7 +14,161 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      acompanhamentos: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: number
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: number
+          name: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
+      order_items: {
+        Row: {
+          created_at: string
+          id: string
+          order_id: string
+          product_id: string
+          product_name: string
+          quantity: number
+          selected_acomp: string[] | null
+          selected_flavors: string[] | null
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_id: string
+          product_id: string
+          product_name: string
+          quantity: number
+          selected_acomp?: string[] | null
+          selected_flavors?: string[] | null
+          unit_price: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_id?: string
+          product_id?: string
+          product_name?: string
+          quantity?: number
+          selected_acomp?: string[] | null
+          selected_flavors?: string[] | null
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          address: string
+          created_at: string
+          customer_name: string
+          delivery_fee: number
+          delivery_zone: string
+          delivery_zone_name: string
+          id: string
+          payment_method: string
+          status: string
+          subtotal: number
+          total: number
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          customer_name: string
+          delivery_fee?: number
+          delivery_zone: string
+          delivery_zone_name: string
+          id?: string
+          payment_method: string
+          status?: string
+          subtotal: number
+          total: number
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          customer_name?: string
+          delivery_fee?: number
+          delivery_zone?: string
+          delivery_zone_name?: string
+          id?: string
+          payment_method?: string
+          status?: string
+          subtotal?: number
+          total?: number
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          allow_duplicate_flavors: boolean
+          available_flavors: string[] | null
+          category: string
+          created_at: string
+          description: string
+          display_order: number
+          emoji: string
+          has_flavors: boolean
+          id: string
+          image: string
+          max_flavors: number | null
+          name: string
+          price: number
+        }
+        Insert: {
+          allow_duplicate_flavors?: boolean
+          available_flavors?: string[] | null
+          category: string
+          created_at?: string
+          description: string
+          display_order?: number
+          emoji?: string
+          has_flavors?: boolean
+          id: string
+          image: string
+          max_flavors?: number | null
+          name: string
+          price: number
+        }
+        Update: {
+          allow_duplicate_flavors?: boolean
+          available_flavors?: string[] | null
+          category?: string
+          created_at?: string
+          description?: string
+          display_order?: number
+          emoji?: string
+          has_flavors?: boolean
+          id?: string
+          image?: string
+          max_flavors?: number | null
+          name?: string
+          price?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
