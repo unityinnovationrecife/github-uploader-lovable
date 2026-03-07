@@ -35,6 +35,7 @@ const emptyForm = (): Omit<Product, 'id'> => ({
   allow_duplicate_flavors: false,
   has_acomp: false,
   display_order: 0,
+  visible: true,
 });
 
 export default function AdminProdutos() {
