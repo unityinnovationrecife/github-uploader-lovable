@@ -1,4 +1,5 @@
 import { Flame, ChevronRight } from 'lucide-react';
+import heroLogo from '@/assets/hero-logo.png';
 
 export default function HeroBanner() {
   const scrollToProducts = () => {
@@ -24,8 +25,8 @@ export default function HeroBanner() {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 lg:py-32">
         <div className="text-center font-bold items-center justify-center flex flex-col">
           {/* Logo */}
-          <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden mb-8 border-4 border-orange-500/20 shadow-xl shadow-orange-500/10 animate-fade-in bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
-            <span className="text-5xl sm:text-6xl">🍗</span>
+          <div className="mb-6 animate-fade-in">
+            <img src={heroLogo} alt="G&S Salgados" className="w-48 h-48 sm:w-64 sm:h-64 object-contain drop-shadow-2xl" />
           </div>
 
           {/* Badge */}
