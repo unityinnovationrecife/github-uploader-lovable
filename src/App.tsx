@@ -11,6 +11,7 @@ import AdminLayout from "./components/admin/AdminLayout";
 import AdminProdutos from "./pages/admin/AdminProdutos";
 import AdminPedidos from "./pages/admin/AdminPedidos";
 import AdminAcompanhamentos from "./pages/admin/AdminAcompanhamentos";
+import OrderTracking from "./pages/OrderTracking";
 
 const queryClient = new QueryClient();
 
