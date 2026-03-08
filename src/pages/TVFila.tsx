@@ -2,11 +2,17 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import logo from '@/assets/logo.png';
 
+type OrderItem = {
+  product_name: string;
+  quantity: number;
+};
+
 type Order = {
   id: string;
   customer_name: string;
   status: string;
   created_at: string;
+  order_items: OrderItem[];
 };
 
 const STATUS_LABELS: Record<string, { label: string; color: string; bgColor: string; pulse: boolean }> = {
