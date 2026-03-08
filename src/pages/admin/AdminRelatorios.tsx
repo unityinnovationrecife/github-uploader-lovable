@@ -16,6 +16,15 @@ import {
 type StatCard = { label: string; value: string; icon: React.ElementType; color: string };
 type DayStat = { date: string; pedidos: number; faturamento: number };
 type ProductStat = { name: string; quantidade: number; faturamento: number };
+type CouponStat = {
+  id: string;
+  code: string;
+  type: 'percent' | 'fixed';
+  value: number;
+  uses_count: number;
+  active: boolean;
+  expires_at: string | null;
+};
 
 type FullOrder = {
   id: string;
