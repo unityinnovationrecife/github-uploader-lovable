@@ -205,10 +205,10 @@ export default function TVFila() {
       style={{
         minHeight: '100vh',
         background: newOrderFlash
-          ? 'linear-gradient(135deg, #1a1200 0%, #2a1a00 50%, #1a1200 100%)'
-          : 'linear-gradient(135deg, #0a0a0f 0%, #18181b 50%, #0f0f14 100%)',
+          ? 'linear-gradient(135deg, #fff8e1 0%, #fff3cd 50%, #fff8e1 100%)'
+          : 'linear-gradient(135deg, #f8f8fa 0%, #ffffff 50%, #f3f4f6 100%)',
         fontFamily: "'Poppins', Arial, sans-serif",
-        color: '#ffffff',
+        color: '#18181b',
         display: 'flex',
         flexDirection: 'column',
         transition: 'background 0.4s ease',
@@ -227,17 +227,18 @@ export default function TVFila() {
       <header style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '20px 40px',
-        borderBottom: '1px solid rgba(255,255,255,0.08)',
-        background: 'rgba(0,0,0,0.4)',
+        borderBottom: '1px solid #e4e4e7',
+        background: 'rgba(255,255,255,0.9)',
         backdropFilter: 'blur(10px)',
+        boxShadow: '0 1px 8px rgba(0,0,0,0.06)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
           <img src={logo} alt="Logo" style={{ height: 56, objectFit: 'contain' }} />
           <div>
-            <h1 style={{ fontSize: 28, fontWeight: 800, margin: 0, letterSpacing: '-0.5px' }}>
+            <h1 style={{ fontSize: 28, fontWeight: 800, margin: 0, letterSpacing: '-0.5px', color: '#18181b' }}>
               Fila de Pedidos
             </h1>
-            <p style={{ fontSize: 13, color: '#a1a1aa', margin: 0 }}>Atualização em tempo real</p>
+            <p style={{ fontSize: 13, color: '#71717a', margin: 0 }}>Atualização em tempo real</p>
           </div>
         </div>
 
@@ -248,9 +249,9 @@ export default function TVFila() {
             style={{
               display: 'flex', alignItems: 'center', gap: 8,
               padding: '8px 16px', borderRadius: 999, cursor: 'pointer',
-              background: soundEnabled ? 'rgba(249,115,22,0.15)' : 'rgba(255,255,255,0.06)',
-              border: `1px solid ${soundEnabled ? 'rgba(249,115,22,0.5)' : 'rgba(255,255,255,0.12)'}`,
-              color: soundEnabled ? '#f97316' : '#71717a',
+              background: soundEnabled ? 'rgba(249,115,22,0.1)' : 'rgba(0,0,0,0.04)',
+              border: `1px solid ${soundEnabled ? 'rgba(249,115,22,0.4)' : '#e4e4e7'}`,
+              color: soundEnabled ? '#f97316' : '#a1a1aa',
               fontSize: 13, fontWeight: 600, transition: 'all 0.2s ease',
             }}
           >
@@ -262,7 +263,7 @@ export default function TVFila() {
             <div style={{ fontSize: 36, fontWeight: 700, fontVariantNumeric: 'tabular-nums', color: '#f97316' }}>
               <Clock />
             </div>
-            <div style={{ fontSize: 12, color: '#71717a' }}>
+            <div style={{ fontSize: 12, color: '#a1a1aa' }}>
               Últ. atualiz: {lastUpdate.toLocaleTimeString('pt-BR')}
             </div>
           </div>
@@ -283,7 +284,7 @@ export default function TVFila() {
                 <div key={s} style={{
                   display: 'flex', alignItems: 'center', gap: 8,
                   padding: '6px 14px', borderRadius: 999,
-                  background: info.bgColor, border: `1px solid ${info.color}40`,
+                  background: info.bgColor, border: `1px solid ${info.color}50`,
                 }}>
                   <span style={{ width: 8, height: 8, borderRadius: '50%', background: info.color, display: 'inline-block' }} />
                   <span style={{ fontSize: 12, fontWeight: 600, color: info.color }}>{info.label}</span>
@@ -295,11 +296,11 @@ export default function TVFila() {
           {orders.length === 0 ? (
             <div style={{
               display: 'flex', flexDirection: 'column', alignItems: 'center',
-              justifyContent: 'center', height: 300, gap: 16, color: '#3f3f46',
+              justifyContent: 'center', height: 300, gap: 16, color: '#a1a1aa',
             }}>
               <span style={{ fontSize: 64 }}>🍽️</span>
-              <p style={{ fontSize: 22, fontWeight: 600 }}>Nenhum pedido em andamento</p>
-              <p style={{ fontSize: 14 }}>Os pedidos aparecerão aqui automaticamente</p>
+              <p style={{ fontSize: 22, fontWeight: 600, color: '#71717a' }}>Nenhum pedido em andamento</p>
+              <p style={{ fontSize: 14, color: '#a1a1aa' }}>Os pedidos aparecerão aqui automaticamente</p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -313,10 +314,10 @@ export default function TVFila() {
                     key={order.id}
                     style={{
                       background: isNew
-                        ? 'rgba(245,158,11,0.12)'
+                        ? 'rgba(245,158,11,0.08)'
                         : isFirst
-                          ? 'rgba(249,115,22,0.07)'
-                          : 'rgba(255,255,255,0.04)',
+                          ? 'rgba(249,115,22,0.05)'
+                          : '#ffffff',
                       border: `2px solid ${
                         isNew   ? '#f59e0b' :
                         isFirst ? '#f97316' :
@@ -331,8 +332,8 @@ export default function TVFila() {
                       gap: 20,
                       transition: 'border-color 0.6s ease, background 0.6s ease, box-shadow 0.6s ease',
                       boxShadow: isNew
-                        ? '0 0 28px rgba(245,158,11,0.35), 0 0 60px rgba(245,158,11,0.12)'
-                        : 'none',
+                        ? '0 0 24px rgba(245,158,11,0.2), 0 2px 8px rgba(0,0,0,0.06)'
+                        : '0 1px 4px rgba(0,0,0,0.06)',
                       animation: isNew ? 'tv-slide-in 0.5s cubic-bezier(0.16,1,0.3,1) both' : undefined,
                     }}
                   >
@@ -343,12 +344,12 @@ export default function TVFila() {
                       transition: 'background 0.6s ease',
                     }} />
 
-                    {/* "NOVO" badge for incoming orders */}
+                    {/* "NOVO" badge */}
                     {isNew && (
                       <div style={{
                         position: 'absolute', top: 10, right: 14,
                         fontSize: 10, fontWeight: 800, letterSpacing: '0.12em',
-                        color: '#f59e0b', background: 'rgba(245,158,11,0.18)',
+                        color: '#f59e0b', background: 'rgba(245,158,11,0.15)',
                         border: '1px solid rgba(245,158,11,0.5)',
                         padding: '2px 8px', borderRadius: 999,
                         animation: 'tv-pulse 1s ease-in-out infinite',
@@ -361,8 +362,8 @@ export default function TVFila() {
                     <div style={{
                       width: 48, height: 48, borderRadius: '50%', flexShrink: 0,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      background: isFirst ? '#f97316' : 'rgba(255,255,255,0.08)',
-                      color: isFirst ? '#fff' : '#71717a',
+                      background: isFirst ? '#f97316' : '#f3f4f6',
+                      color: isFirst ? '#fff' : '#9ca3af',
                       fontSize: 20, fontWeight: 900,
                     }}>
                       {index + 1}º
@@ -373,7 +374,7 @@ export default function TVFila() {
                       {/* Nome + badge */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
                         <span style={{
-                          fontSize: 22, fontWeight: 800,
+                          fontSize: 22, fontWeight: 800, color: '#18181b',
                           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                         }}>
                           {order.customer_name}
@@ -381,7 +382,7 @@ export default function TVFila() {
                         {isFirst && !isNew && (
                           <span style={{
                             fontSize: 11, fontWeight: 700, color: '#f97316',
-                            background: 'rgba(249,115,22,0.15)', border: '1px solid rgba(249,115,22,0.4)',
+                            background: 'rgba(249,115,22,0.1)', border: '1px solid rgba(249,115,22,0.3)',
                             padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap',
                           }}>
                             ⏱ Primeiro da fila
@@ -389,7 +390,7 @@ export default function TVFila() {
                         )}
                       </div>
                       {/* Data do pedido */}
-                      <div style={{ fontSize: 12, color: '#71717a', marginBottom: 6 }}>
+                      <div style={{ fontSize: 12, color: '#9ca3af', marginBottom: 6 }}>
                         📅 {new Date(order.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })} às {new Date(order.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                       </div>
                       {/* Itens do pedido */}
@@ -397,17 +398,17 @@ export default function TVFila() {
                         <div style={{
                           display: 'flex', flexDirection: 'column', gap: 3,
                           padding: '8px 10px', borderRadius: 10,
-                          background: 'rgba(255,255,255,0.04)',
-                          border: '1px solid rgba(255,255,255,0.07)',
+                          background: '#f8f8fa',
+                          border: '1px solid #e4e4e7',
                         }}>
                           {order.order_items.map((item, i) => (
                             <div key={i} style={{
                               display: 'flex', alignItems: 'center', gap: 6,
-                              fontSize: 12, color: '#d4d4d8',
+                              fontSize: 12, color: '#3f3f46',
                             }}>
                               <span style={{
                                 minWidth: 20, height: 20, borderRadius: 6,
-                                background: 'rgba(249,115,22,0.2)',
+                                background: 'rgba(249,115,22,0.15)',
                                 color: '#f97316', fontSize: 11, fontWeight: 700,
                                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                                 flexShrink: 0,
@@ -452,13 +453,13 @@ export default function TVFila() {
         {recentDelivered.length > 0 && (
           <div style={{
             width: 280,
-            borderLeft: '1px solid rgba(255,255,255,0.06)',
-            background: 'rgba(0,0,0,0.3)',
+            borderLeft: '1px solid #e4e4e7',
+            background: '#f8f8fa',
             padding: '30px 24px',
             overflow: 'auto',
           }}>
             <h2 style={{
-              fontSize: 13, fontWeight: 700, color: '#52525b',
+              fontSize: 13, fontWeight: 700, color: '#a1a1aa',
               letterSpacing: '0.12em', textTransform: 'uppercase',
               marginBottom: 20,
             }}>
@@ -468,13 +469,13 @@ export default function TVFila() {
               {recentDelivered.map(order => (
                 <div key={order.id} style={{
                   background: 'rgba(34,197,94,0.06)',
-                  border: '1px solid rgba(34,197,94,0.2)',
+                  border: '1px solid rgba(34,197,94,0.25)',
                   borderRadius: 14, padding: '14px 18px',
                 }}>
-                  <div style={{ fontSize: 11, color: '#52525b', marginBottom: 4 }}>
+                  <div style={{ fontSize: 11, color: '#a1a1aa', marginBottom: 4 }}>
                     #{shortId(order.id)}
                   </div>
-                  <div style={{ fontSize: 17, fontWeight: 700, color: '#d4d4d8' }}>
+                  <div style={{ fontSize: 17, fontWeight: 700, color: '#3f3f46' }}>
                     {order.customer_name}
                   </div>
                   <div style={{ fontSize: 11, color: '#22c55e', marginTop: 4 }}>
