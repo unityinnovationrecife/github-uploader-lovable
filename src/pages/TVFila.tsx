@@ -202,8 +202,7 @@ export default function TVFila() {
 
   const getStatusInfo = (status: string) => STATUS_LABELS[status] ?? STATUS_LABELS['pending'];
 
-  return (
-  // ─── theme tokens ───────────────────────────────────────────────────────────
+  // ─── theme tokens ────────────────────────────────────────────────────────────
   const t = {
     bg:          dark ? 'linear-gradient(135deg, #0a0a0f 0%, #18181b 50%, #0f0f14 100%)'
                       : 'linear-gradient(135deg, #f8f8fa 0%, #ffffff 50%, #f3f4f6 100%)',
