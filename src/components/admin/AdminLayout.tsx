@@ -39,6 +39,7 @@ export default function AdminLayout() {
     { to: '/admin/produtos', icon: Package, label: 'Produtos' },
     { to: '/admin/pedidos', icon: ShoppingBag, label: 'Pedidos' },
     { to: '/admin/acompanhamentos', icon: UtensilsCrossed, label: 'Acompanhamentos' },
+    { to: '/admin/relatorios', icon: BarChart2, label: 'Relatórios' },
   ];
 
   return (
