@@ -440,7 +440,22 @@ export default function CheckoutModal() {
                   <input type="hidden" value={pagamento} required />
                 </div>
 
-                {/* Total com entrega */}
+                {/* Observações */}
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-medium text-[var(--text-muted)] mb-2">
+                    <MessageSquare className="w-4 h-4" />
+                    Observações <span className="text-xs font-normal opacity-60">(opcional)</span>
+                  </label>
+                  <textarea
+                    value={observacoes}
+                    onChange={(e) => setObservacoes(e.target.value)}
+                    maxLength={300}
+                    rows={3}
+                    placeholder="Ex: Ponto de referência, instruções especiais de entrega, preferências..."
+                    className="w-full px-4 py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/25 transition-all resize-none text-sm"
+                  />
+                  <p className="text-xs text-[var(--text-muted)] mt-1 text-right">{observacoes.length}/300</p>
+                </div>
                 {zoneKey && (
                   <div className="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl p-4 space-y-1.5">
                     <div className="flex items-center justify-between text-sm">
