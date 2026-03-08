@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import logo from '@/assets/logo.png';
 
@@ -30,7 +30,6 @@ function Clock() {
     const t = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(t);
   }, []);
-
   const pad = (n: number) => String(n).padStart(2, '0');
   return (
     <span>
@@ -39,12 +38,68 @@ function Clock() {
   );
 }
 
+/** Plays a friendly "ding-dong" alert using Web Audio API */
+function playNewOrderSound(ctx: AudioContext) {
+  const now = ctx.currentTime;
+
+  const playNote = (freq: number, startTime: number, duration: number, gainVal: number) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, startTime);
+
+    gain.gain.setValueAtTime(0, startTime);
+    gain.gain.linearRampToValueAtTime(gainVal, startTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+    osc.start(startTime);
+    osc.stop(startTime + duration);
+  };
+
+  // Ding-dong: two pleasant tones
+  playNote(880, now,        0.5, 0.4);  // A5
+  playNote(660, now + 0.22, 0.6, 0.35); // E5
+}
+
 export default function TVFila() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [recentDelivered, setRecentDelivered] = useState<Order[]>([]);
   const [lastUpdate, setLastUpdate] = useState(new Date());
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [newOrderFlash, setNewOrderFlash] = useState(false);
 
-  const fetchOrders = async () => {
+  // AudioContext — created on first user interaction to comply with browser autoplay policy
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  // Track known order IDs to detect genuinely new ones
+  const knownIdsRef = useRef<Set<string>>(new Set());
+  // Whether first load is done (don't alert on initial fetch)
+  const initialLoadDoneRef = useRef(false);
+
+  const getAudioCtx = useCallback(() => {
+    if (!audioCtxRef.current) {
+      audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    return audioCtxRef.current;
+  }, []);
+
+  const triggerAlert = useCallback(() => {
+    if (!soundEnabled) return;
+    try {
+      const ctx = getAudioCtx();
+      if (ctx.state === 'suspended') ctx.resume();
+      playNewOrderSound(ctx);
+    } catch (e) {
+      console.warn('Audio error:', e);
+    }
+    // Flash screen briefly
+    setNewOrderFlash(true);
+    setTimeout(() => setNewOrderFlash(false), 800);
+  }, [soundEnabled, getAudioCtx]);
+
+  const fetchOrders = useCallback(async () => {
     const { data } = await supabase
       .from('orders')
       .select('id, customer_name, status, created_at')
@@ -54,16 +109,24 @@ export default function TVFila() {
 
     if (data) {
       const active = data.filter(o => ACTIVE_STATUSES.includes(o.status));
-      const delivered = data
-        .filter(o => o.status === 'delivered')
-        .slice(-6)
-        .reverse();
+      const delivered = data.filter(o => o.status === 'delivered').slice(-6).reverse();
+
+      // Detect new orders (only after initial load)
+      if (initialLoadDoneRef.current) {
+        const incomingPending = data.filter(o => o.status === 'pending');
+        const hasNew = incomingPending.some(o => !knownIdsRef.current.has(o.id));
+        if (hasNew) triggerAlert();
+      }
+
+      // Update known IDs set
+      data.forEach(o => knownIdsRef.current.add(o.id));
+      initialLoadDoneRef.current = true;
 
       setOrders(active);
       setRecentDelivered(delivered);
       setLastUpdate(new Date());
     }
-  };
+  }, [triggerAlert]);
 
   useEffect(() => {
     fetchOrders();
@@ -76,7 +139,17 @@ export default function TVFila() {
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, []);
+  }, [fetchOrders]);
+
+  // Unlock AudioContext on first click anywhere on the page
+  useEffect(() => {
+    const unlock = () => {
+      getAudioCtx();
+      window.removeEventListener('click', unlock);
+    };
+    window.addEventListener('click', unlock);
+    return () => window.removeEventListener('click', unlock);
+  }, [getAudioCtx]);
 
   const getStatusInfo = (status: string) => STATUS_LABELS[status] ?? STATUS_LABELS['pending'];
 
