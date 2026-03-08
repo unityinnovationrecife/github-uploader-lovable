@@ -317,6 +317,21 @@ export default function CheckoutModal() {
                   />
                 </div>
 
+                {/* Telefone (opcional — para confirmação via WhatsApp) */}
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-medium text-[var(--text-muted)] mb-2">
+                    <Phone className="w-4 h-4" />
+                    WhatsApp <span className="text-xs font-normal opacity-60">(opcional — receba confirmação)</span>
+                  </label>
+                  <input
+                    type="tel"
+                    value={telefone}
+                    onChange={(e) => setTelefone(e.target.value)}
+                    placeholder="(81) 9 9999-9999"
+                    className="w-full px-4 py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/25 transition-all"
+                  />
+                </div>
+
                 {/* Bairro */}
                 <div>
                   <label className="flex items-center gap-2 text-sm font-medium text-[var(--text-muted)] mb-2">
