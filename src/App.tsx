@@ -11,6 +11,7 @@ import AdminLayout from "./components/admin/AdminLayout";
 import AdminProdutos from "./pages/admin/AdminProdutos";
 import AdminPedidos from "./pages/admin/AdminPedidos";
 import AdminAcompanhamentos from "./pages/admin/AdminAcompanhamentos";
+import AdminRelatorios from "./pages/admin/AdminRelatorios";
 import OrderTracking from "./pages/OrderTracking";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
               <Route path="produtos" element={<AdminProdutos />} />
               <Route path="pedidos" element={<AdminPedidos />} />
               <Route path="acompanhamentos" element={<AdminAcompanhamentos />} />
+              <Route path="relatorios" element={<AdminRelatorios />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

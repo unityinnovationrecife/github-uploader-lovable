@@ -54,51 +54,87 @@ const STATUS_BADGE: Record<string, string> = {
 const STATUS_FLOW = ['pending', 'confirmed', 'preparing', 'delivering', 'delivered'];
 
 export default function AdminPedidos() {
+  const PAGE_SIZE = 20;
+
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState(0); // 0-indexed
   const [expanded, setExpanded] = useState<string | null>(null);
   const [loadingItems, setLoadingItems] = useState<string | null>(null);
   const [showArchived, setShowArchived] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [search, setSearch] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   const { toast } = useToast();
   const { playNotification } = useOrderSound();
   const isFirstLoad = useRef(true);
 
   const pendingCount = orders.filter((o) => !o.archived && o.status === 'pending').length;
 
-  // Atualiza o título da aba com o contador de pedidos pendentes
+  // Título da aba com contador
   useEffect(() => {
     const base = 'Pedidos | Admin';
-    const title = !loading && pendingCount > 0 ? `(${pendingCount}) ${base}` : base;
-    document.title = title;
+    document.title = !loading && pendingCount > 0 ? `(${pendingCount}) ${base}` : base;
     return () => { document.title = 'G&S Salgados'; };
   }, [pendingCount, loading]);
 
-  const fetchOrders = async () => {
-    const { data } = await supabase
+  // Busca paginada no servidor
+  const fetchOrders = async (pg: number, archived: boolean, status: string, name: string) => {
+    setLoading(true);
+    setExpanded(null);
+
+    let query = supabase
       .from('orders')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .select('*', { count: 'exact' })
+      .eq('archived', archived)
+      .order('created_at', { ascending: false })
+      .range(pg * PAGE_SIZE, pg * PAGE_SIZE + PAGE_SIZE - 1);
+
+    if (status !== 'all') query = query.eq('status', status);
+    if (name.trim()) query = query.ilike('customer_name', `%${name.trim()}%`);
+
+    const { data, count } = await query;
     setOrders((data as Order[]) || []);
+    setTotalCount(count ?? 0);
     setLoading(false);
     isFirstLoad.current = false;
   };
 
+  // Re-fetch quando filtros ou página mudam
   useEffect(() => {
-    fetchOrders();
+    fetchOrders(page, showArchived, statusFilter, search);
+  }, [page, showArchived, statusFilter, search]);
 
+  // Reset para página 0 ao trocar filtros
+  const applyFilter = (newStatus: string, newArchived: boolean) => {
+    setPage(0);
+    setStatusFilter(newStatus);
+    setShowArchived(newArchived);
+  };
+
+  const applySearch = (name: string) => {
+    setPage(0);
+    setSearch(name);
+  };
+
+  // Realtime: novos pedidos prepend na lista (só se na pág 0 e sem filtros ativos)
+  useEffect(() => {
     const channel = supabase
       .channel('admin-orders')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, (payload) => {
         const newOrder = payload.new as Order;
-        setOrders((prev) => [newOrder, ...prev]);
         if (!isFirstLoad.current) {
           playNotification();
           toast({
             title: '🛎️ Novo pedido!',
             description: `${newOrder.customer_name} — ${newOrder.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`,
           });
+          // Prepend apenas se estiver na primeira página de ativos sem filtros
+          if (page === 0 && !showArchived && statusFilter === 'all' && !search) {
+            setOrders((prev) => [newOrder, ...prev.slice(0, PAGE_SIZE - 1)]);
+            setTotalCount((c) => c + 1);
+          }
         }
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, (payload) => {
@@ -109,7 +145,7 @@ export default function AdminPedidos() {
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, []);
+  }, [page, showArchived, statusFilter, search]);
 
   const toggleExpand = async (order: Order) => {
     if (expanded === order.id) { setExpanded(null); return; }
@@ -138,7 +174,9 @@ export default function AdminPedidos() {
     if (error) {
       toast({ title: 'Erro ao arquivar', variant: 'destructive' });
     } else {
-      setOrders(prev => prev.map(o => o.id === order.id ? { ...o, archived: newVal } : o));
+      // Remove da lista atual (mudou de aba)
+      setOrders(prev => prev.filter(o => o.id !== order.id));
+      setTotalCount(c => c - 1);
       toast({ title: newVal ? '📦 Pedido arquivado' : '📂 Pedido restaurado' });
       if (expanded === order.id) setExpanded(null);
     }
@@ -147,15 +185,7 @@ export default function AdminPedidos() {
   const fmt = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   const fmtDate = (d: string) => new Date(d).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
 
-  // Filtro aplicado
-  const visibleOrders = orders.filter((o) => {
-    if (o.archived !== showArchived) return false;
-    if (statusFilter !== 'all' && o.status !== statusFilter) return false;
-    if (search && !o.customer_name.toLowerCase().includes(search.toLowerCase())) return false;
-    return true;
-  });
-
-  const archivedCount = orders.filter(o => o.archived).length;
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -164,12 +194,13 @@ export default function AdminPedidos() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Pedidos</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            {visibleOrders.length} {showArchived ? 'arquivados' : 'pedido' + (visibleOrders.length !== 1 ? 's' : '')}
+            {totalCount} {showArchived ? 'arquivados' : 'pedido' + (totalCount !== 1 ? 's' : '')}
+            {totalPages > 1 && ` · pág. ${page + 1} de ${totalPages}`}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setShowArchived(!showArchived)}
+            onClick={() => { setPage(0); setShowArchived(!showArchived); setStatusFilter('all'); setSearch(''); setSearchInput(''); }}
             className={`inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border transition-all ${
               showArchived
                 ? 'bg-muted text-foreground border-border'
@@ -177,7 +208,7 @@ export default function AdminPedidos() {
             }`}
           >
             {showArchived ? <ArchiveRestore className="w-3.5 h-3.5" /> : <Archive className="w-3.5 h-3.5" />}
-            {showArchived ? 'Ver ativos' : `Arquivados${archivedCount > 0 ? ` (${archivedCount})` : ''}`}
+            {showArchived ? 'Ver ativos' : 'Arquivados'}
           </button>
           {!showArchived && (
             <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-primary/10 text-primary border border-primary/20 px-3 py-1.5 rounded-full">
@@ -190,14 +221,16 @@ export default function AdminPedidos() {
 
       {/* Filtros */}
       <div className="flex-shrink-0 px-6 py-3 border-b border-border bg-background/80 flex flex-col sm:flex-row gap-2">
-        {/* Busca por nome */}
+        {/* Busca por nome com debounce manual */}
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por nome..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && applySearch(searchInput)}
+            onBlur={() => applySearch(searchInput)}
+            placeholder="Buscar por nome... (Enter)"
             className="w-full pl-9 pr-4 py-2 text-sm rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/25 transition-all"
           />
         </div>
@@ -206,7 +239,7 @@ export default function AdminPedidos() {
           <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(e) => applyFilter(e.target.value, showArchived)}
             className="pl-9 pr-8 py-2 text-sm rounded-xl bg-muted/50 border border-border text-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/25 transition-all appearance-none cursor-pointer"
           >
             <option value="all">Todos os status</option>
@@ -224,12 +257,12 @@ export default function AdminPedidos() {
             <div className="flex justify-center py-12">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
-          ) : visibleOrders.length === 0 ? (
+          ) : orders.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground bg-card border border-border rounded-2xl">
               {showArchived ? 'Nenhum pedido arquivado.' : 'Nenhum pedido encontrado.'}
             </div>
           ) : (
-            visibleOrders.map((order) => {
+            orders.map((order) => {
               const statusCfg = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
               const StatusIcon = statusCfg.icon;
               const isExpanded = expanded === order.id;
@@ -379,6 +412,40 @@ export default function AdminPedidos() {
             })
           )}
         </div>
+
+        {/* Paginação */}
+        {totalPages > 1 && (
+          <div className="max-w-5xl mx-auto mt-4 flex items-center justify-between">
+            <button
+              onClick={() => setPage(p => Math.max(0, p - 1))}
+              disabled={page === 0}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              ← Anterior
+            </button>
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                const pg = totalPages <= 7 ? i : (page < 4 ? i : (page > totalPages - 4 ? totalPages - 7 + i : page - 3 + i));
+                return (
+                  <button
+                    key={pg}
+                    onClick={() => setPage(pg)}
+                    className={`w-8 h-8 rounded-lg text-xs font-medium transition-all ${pg === page ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
+                  >
+                    {pg + 1}
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+              disabled={page >= totalPages - 1}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Próxima →
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
