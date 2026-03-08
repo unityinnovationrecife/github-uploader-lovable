@@ -141,6 +141,15 @@ export default function AdminLayout() {
         <div className="p-4 border-t border-border space-y-1">
           {/* Botão de notificações push */}
           <NotifButton />
+        <a
+            href="/tv-fila"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-primary/10 hover:text-primary transition-all w-full border border-transparent hover:border-primary/20"
+          >
+            <Tv className="w-4 h-4" />
+            TV de Fila
+          </a>
           <a
             href="/"
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-all w-full"
