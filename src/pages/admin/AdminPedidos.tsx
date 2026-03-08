@@ -6,7 +6,6 @@ import {
   Archive, ArchiveRestore, Search, Filter, Phone,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useOrderSound } from '@/hooks/use-order-sound';
 
 type OrderItem = {
   id: string;
