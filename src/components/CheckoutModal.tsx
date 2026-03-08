@@ -58,6 +58,7 @@ export default function CheckoutModal() {
         .from('orders')
         .insert({
           customer_name: nome,
+          customer_phone: telefone || null,
           delivery_zone: zone,
           delivery_zone_name: getZoneName(),
           address: endereco,
@@ -89,44 +90,71 @@ export default function CheckoutModal() {
     const now = new Date().toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
     const totalItems = items.reduce((acc, i) => acc + i.quantity, 0);
 
-    const lines: string[] = [];
-    lines.push('🍢 *NOVO PEDIDO — G&S SALGADOS* 🍢');
-    lines.push(`🕐 ${now}`);
-    lines.push('━━━━━━━━━━━━━━━━━━━━━━━');
-    lines.push('');
-    lines.push(`🛒 *ITENS DO PEDIDO* (${totalItems} ${totalItems === 1 ? 'item' : 'itens'})`);
-    lines.push('');
+    // ── Mensagem para o lojista ──
+    const ownerLines: string[] = [];
+    ownerLines.push('🍢 *NOVO PEDIDO — G&S SALGADOS* 🍢');
+    ownerLines.push(`🕐 ${now}`);
+    ownerLines.push('━━━━━━━━━━━━━━━━━━━━━━━');
+    ownerLines.push('');
+    ownerLines.push(`🛒 *ITENS DO PEDIDO* (${totalItems} ${totalItems === 1 ? 'item' : 'itens'})`);
+    ownerLines.push('');
     items.forEach((item, idx) => {
-      lines.push(`${idx + 1}. *${item.name}*`);
-      lines.push(`   📦 Qtd: ${item.quantity}x  |  💰 ${formatPrice(item.price * item.quantity)}`);
-      if (item.selectedFlavors?.length) lines.push(`   🍽️ Sabores: ${item.selectedFlavors.join(', ')}`);
-      if (item.selectedAcomp?.length)   lines.push(`   🥗 Acomp: ${item.selectedAcomp.join(', ')}`);
+      ownerLines.push(`${idx + 1}. *${item.name}*`);
+      ownerLines.push(`   📦 Qtd: ${item.quantity}x  |  💰 ${formatPrice(item.price * item.quantity)}`);
+      if (item.selectedFlavors?.length) ownerLines.push(`   🍽️ Sabores: ${item.selectedFlavors.join(', ')}`);
+      if (item.selectedAcomp?.length)   ownerLines.push(`   🥗 Acomp: ${item.selectedAcomp.join(', ')}`);
     });
-    lines.push('');
-    lines.push('━━━━━━━━━━━━━━━━━━━━━━━');
-    lines.push(`💵 Subtotal: ${formatPrice(subtotal)}`);
+    ownerLines.push('');
+    ownerLines.push('━━━━━━━━━━━━━━━━━━━━━━━');
+    ownerLines.push(`💵 Subtotal: ${formatPrice(subtotal)}`);
     if (deliveryFee > 0) {
-      lines.push(`🛵 Entrega (${getZoneName()}): ${formatPrice(deliveryFee)}`);
+      ownerLines.push(`🛵 Entrega (${getZoneName()}): ${formatPrice(deliveryFee)}`);
     } else {
-      lines.push(`🛵 Entrega (${getZoneName()}): *Grátis* ✅`);
+      ownerLines.push(`🛵 Entrega (${getZoneName()}): *Grátis* ✅`);
     }
-    lines.push(`💳 Pagamento: ${pagamento}`);
-    lines.push('');
-    lines.push(`✅ *TOTAL: ${formatPrice(finalTotal)}*`);
-    lines.push('━━━━━━━━━━━━━━━━━━━━━━━');
-    lines.push('');
-    lines.push('📍 *DADOS DE ENTREGA*');
-    lines.push(`👤 Cliente: ${nome}`);
-    lines.push(`🏠 Endereço: ${endereco}`);
-    lines.push(`📌 Bairro: ${getZoneName()}`);
-    lines.push('');
-    lines.push('_Pedido gerado automaticamente pelo site_ 🤖');
+    ownerLines.push(`💳 Pagamento: ${pagamento}`);
+    ownerLines.push('');
+    ownerLines.push(`✅ *TOTAL: ${formatPrice(finalTotal)}*`);
+    ownerLines.push('━━━━━━━━━━━━━━━━━━━━━━━');
+    ownerLines.push('');
+    ownerLines.push('📍 *DADOS DE ENTREGA*');
+    ownerLines.push(`👤 Cliente: ${nome}`);
+    if (telefone) ownerLines.push(`📱 Telefone: ${telefone}`);
+    ownerLines.push(`🏠 Endereço: ${endereco}`);
+    ownerLines.push(`📌 Bairro: ${getZoneName()}`);
+    ownerLines.push('');
+    ownerLines.push('_Pedido gerado automaticamente pelo site_ 🤖');
 
-    const message = lines.join('\n');
+    // ── Mensagem de confirmação para o cliente ──
+    const clientLines: string[] = [];
+    clientLines.push(`Olá, *${nome}*! 👋`);
+    clientLines.push('');
+    clientLines.push('✅ *Seu pedido foi recebido com sucesso!*');
+    clientLines.push('🍢 *G&S SALGADOS*');
+    clientLines.push('━━━━━━━━━━━━━━━━━━━━━━━');
+    clientLines.push('');
+    items.forEach((item, idx) => {
+      clientLines.push(`${idx + 1}. ${item.quantity}x ${item.name} — ${formatPrice(item.price * item.quantity)}`);
+      if (item.selectedFlavors?.length) clientLines.push(`   🍽️ ${item.selectedFlavors.join(', ')}`);
+    });
+    clientLines.push('');
+    clientLines.push(`💰 *Total: ${formatPrice(finalTotal)}*`);
+    if (deliveryFee === 0) clientLines.push('🛵 Entrega: *Grátis* ✅');
+    clientLines.push(`💳 Pagamento: ${pagamento}`);
+    clientLines.push('━━━━━━━━━━━━━━━━━━━━━━━');
+    clientLines.push('');
+    clientLines.push('Em breve entraremos em contato para confirmar. Obrigado! 😊');
 
-    // Try sending via Evolution API (automatic WhatsApp)
+    const message = ownerLines.join('\n');
+    const customerMessage = clientLines.join('\n');
+
+    // Enviar via Evolution API
     const { error: fnError } = await supabase.functions.invoke('send-whatsapp', {
-      body: { message },
+      body: {
+        message,
+        customerPhone: telefone || undefined,
+        customerMessage: telefone ? customerMessage : undefined,
+      },
     });
 
     if (fnError) {
@@ -136,7 +164,7 @@ export default function CheckoutModal() {
 
     clearCart();
     closeCheckout();
-    setNome(''); setRua(''); setNumero(''); setReferencia(''); setPagamento(''); setZone('');
+    setNome(''); setTelefone(''); setRua(''); setNumero(''); setReferencia(''); setPagamento(''); setZone('');
 
     if (savedOrderId) {
       navigate(`/pedido/${savedOrderId}`);
