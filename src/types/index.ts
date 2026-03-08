@@ -12,6 +12,8 @@ export interface Product {
   allowDuplicateFlavors?: boolean;
   /** false = produto esgotado: aparece no cardápio com badge, sem botão de compra */
   available?: boolean;
+  /** true = exibe badge "Mais pedido" no card */
+  featured?: boolean;
 }
 
 export interface CartItem extends Product {
