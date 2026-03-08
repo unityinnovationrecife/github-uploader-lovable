@@ -203,17 +203,43 @@ export default function TVFila() {
   const getStatusInfo = (status: string) => STATUS_LABELS[status] ?? STATUS_LABELS['pending'];
 
   return (
+  // ─── theme tokens ───────────────────────────────────────────────────────────
+  const t = {
+    bg:          dark ? 'linear-gradient(135deg, #0a0a0f 0%, #18181b 50%, #0f0f14 100%)'
+                      : 'linear-gradient(135deg, #f8f8fa 0%, #ffffff 50%, #f3f4f6 100%)',
+    bgFlash:     dark ? 'linear-gradient(135deg, #1a1200 0%, #2a1a00 50%, #1a1200 100%)'
+                      : 'linear-gradient(135deg, #fff8e1 0%, #fff3cd 50%, #fff8e1 100%)',
+    text:        dark ? '#ffffff'  : '#18181b',
+    textMuted:   dark ? '#a1a1aa'  : '#71717a',
+    textFaint:   dark ? '#71717a'  : '#a1a1aa',
+    border:      dark ? 'rgba(255,255,255,0.08)' : '#e4e4e7',
+    headerBg:    dark ? 'rgba(0,0,0,0.4)'        : 'rgba(255,255,255,0.9)',
+    headerShadow:dark ? 'none'                   : '0 1px 8px rgba(0,0,0,0.06)',
+    cardBg:      dark ? 'rgba(255,255,255,0.04)' : '#ffffff',
+    cardBgFirst: dark ? 'rgba(249,115,22,0.07)'  : 'rgba(249,115,22,0.05)',
+    cardBgNew:   dark ? 'rgba(245,158,11,0.12)'  : 'rgba(245,158,11,0.08)',
+    cardShadow:  dark ? 'none'                   : '0 1px 4px rgba(0,0,0,0.06)',
+    posBg:       dark ? 'rgba(255,255,255,0.08)' : '#f3f4f6',
+    posColor:    dark ? '#71717a'                : '#9ca3af',
+    itemsBg:     dark ? 'rgba(255,255,255,0.04)' : '#f8f8fa',
+    itemsBorder: dark ? 'rgba(255,255,255,0.07)' : '#e4e4e7',
+    itemText:    dark ? '#d4d4d8'                : '#3f3f46',
+    sidebarBg:   dark ? 'rgba(0,0,0,0.3)'        : '#f8f8fa',
+    sidebarBorder:dark? 'rgba(255,255,255,0.06)' : '#e4e4e7',
+    deliveredName:dark? '#d4d4d8'               : '#3f3f46',
+    deliveredId: dark ? '#52525b'                : '#a1a1aa',
+  };
+
+  return (
     <div
       style={{
         minHeight: '100vh',
-        background: newOrderFlash
-          ? 'linear-gradient(135deg, #fff8e1 0%, #fff3cd 50%, #fff8e1 100%)'
-          : 'linear-gradient(135deg, #f8f8fa 0%, #ffffff 50%, #f3f4f6 100%)',
+        background: newOrderFlash ? t.bgFlash : t.bg,
         fontFamily: "'Poppins', Arial, sans-serif",
-        color: '#18181b',
+        color: t.text,
         display: 'flex',
         flexDirection: 'column',
-        transition: 'background 0.4s ease',
+        transition: 'background 0.4s ease, color 0.3s ease',
       }}
     >
       {/* Flash border overlay */}
@@ -229,31 +255,49 @@ export default function TVFila() {
       <header style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '20px 40px',
-        borderBottom: '1px solid #e4e4e7',
-        background: 'rgba(255,255,255,0.9)',
+        borderBottom: `1px solid ${t.border}`,
+        background: t.headerBg,
         backdropFilter: 'blur(10px)',
-        boxShadow: '0 1px 8px rgba(0,0,0,0.06)',
+        boxShadow: t.headerShadow,
+        transition: 'background 0.3s ease, border-color 0.3s ease',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
           <img src={logo} alt="Logo" style={{ height: 56, objectFit: 'contain' }} />
           <div>
-            <h1 style={{ fontSize: 28, fontWeight: 800, margin: 0, letterSpacing: '-0.5px', color: '#18181b' }}>
+            <h1 style={{ fontSize: 28, fontWeight: 800, margin: 0, letterSpacing: '-0.5px', color: t.text }}>
               Fila de Pedidos
             </h1>
-            <p style={{ fontSize: 13, color: '#71717a', margin: 0 }}>Atualização em tempo real</p>
+            <p style={{ fontSize: 13, color: t.textMuted, margin: 0 }}>Atualização em tempo real</p>
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          {/* Dark/Light toggle */}
+          <button
+            onClick={() => setDark(v => !v)}
+            title={dark ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
+            style={{
+              width: 40, height: 40, borderRadius: '50%', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+              border: `1px solid ${t.border}`,
+              color: dark ? '#fbbf24' : '#64748b',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            {dark ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+
+          {/* Sound toggle */}
           <button
             onClick={() => setSoundEnabled(v => !v)}
             title={soundEnabled ? 'Silenciar alertas' : 'Ativar alertas sonoros'}
             style={{
               display: 'flex', alignItems: 'center', gap: 8,
               padding: '8px 16px', borderRadius: 999, cursor: 'pointer',
-              background: soundEnabled ? 'rgba(249,115,22,0.1)' : 'rgba(0,0,0,0.04)',
-              border: `1px solid ${soundEnabled ? 'rgba(249,115,22,0.4)' : '#e4e4e7'}`,
-              color: soundEnabled ? '#f97316' : '#a1a1aa',
+              background: soundEnabled ? 'rgba(249,115,22,0.1)' : dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+              border: `1px solid ${soundEnabled ? 'rgba(249,115,22,0.4)' : t.border}`,
+              color: soundEnabled ? '#f97316' : t.textFaint,
               fontSize: 13, fontWeight: 600, transition: 'all 0.2s ease',
             }}
           >
@@ -265,7 +309,7 @@ export default function TVFila() {
             <div style={{ fontSize: 36, fontWeight: 700, fontVariantNumeric: 'tabular-nums', color: '#f97316' }}>
               <Clock />
             </div>
-            <div style={{ fontSize: 12, color: '#a1a1aa' }}>
+            <div style={{ fontSize: 12, color: t.textFaint }}>
               Últ. atualiz: {lastUpdate.toLocaleTimeString('pt-BR')}
             </div>
           </div>
@@ -298,11 +342,11 @@ export default function TVFila() {
           {orders.length === 0 ? (
             <div style={{
               display: 'flex', flexDirection: 'column', alignItems: 'center',
-              justifyContent: 'center', height: 300, gap: 16, color: '#a1a1aa',
+              justifyContent: 'center', height: 300, gap: 16,
             }}>
               <span style={{ fontSize: 64 }}>🍽️</span>
-              <p style={{ fontSize: 22, fontWeight: 600, color: '#71717a' }}>Nenhum pedido em andamento</p>
-              <p style={{ fontSize: 14, color: '#a1a1aa' }}>Os pedidos aparecerão aqui automaticamente</p>
+              <p style={{ fontSize: 22, fontWeight: 600, color: t.textMuted }}>Nenhum pedido em andamento</p>
+              <p style={{ fontSize: 14, color: t.textFaint }}>Os pedidos aparecerão aqui automaticamente</p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -315,15 +359,9 @@ export default function TVFila() {
                   <div
                     key={order.id}
                     style={{
-                      background: isNew
-                        ? 'rgba(245,158,11,0.08)'
-                        : isFirst
-                          ? 'rgba(249,115,22,0.05)'
-                          : '#ffffff',
+                      background: isNew ? t.cardBgNew : isFirst ? t.cardBgFirst : t.cardBg,
                       border: `2px solid ${
-                        isNew   ? '#f59e0b' :
-                        isFirst ? '#f97316' :
-                        info.color
+                        isNew ? '#f59e0b' : isFirst ? '#f97316' : info.color
                       }${isNew ? 'cc' : isFirst ? '80' : '40'}`,
                       borderRadius: 18,
                       padding: '20px 24px',
@@ -334,8 +372,8 @@ export default function TVFila() {
                       gap: 20,
                       transition: 'border-color 0.6s ease, background 0.6s ease, box-shadow 0.6s ease',
                       boxShadow: isNew
-                        ? '0 0 24px rgba(245,158,11,0.2), 0 2px 8px rgba(0,0,0,0.06)'
-                        : '0 1px 4px rgba(0,0,0,0.06)',
+                        ? `0 0 24px rgba(245,158,11,0.2), 0 2px 8px rgba(0,0,0,0.06)`
+                        : t.cardShadow,
                       animation: isNew ? 'tv-slide-in 0.5s cubic-bezier(0.16,1,0.3,1) both' : undefined,
                     }}
                   >
@@ -364,8 +402,8 @@ export default function TVFila() {
                     <div style={{
                       width: 48, height: 48, borderRadius: '50%', flexShrink: 0,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      background: isFirst ? '#f97316' : '#f3f4f6',
-                      color: isFirst ? '#fff' : '#9ca3af',
+                      background: isFirst ? '#f97316' : t.posBg,
+                      color: isFirst ? '#fff' : t.posColor,
                       fontSize: 20, fontWeight: 900,
                     }}>
                       {index + 1}º
@@ -373,10 +411,9 @@ export default function TVFila() {
 
                     {/* Info */}
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      {/* Nome + badge */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
                         <span style={{
-                          fontSize: 22, fontWeight: 800, color: '#18181b',
+                          fontSize: 22, fontWeight: 800, color: t.text,
                           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                         }}>
                           {order.customer_name}
@@ -391,22 +428,20 @@ export default function TVFila() {
                           </span>
                         )}
                       </div>
-                      {/* Data do pedido */}
-                      <div style={{ fontSize: 12, color: '#9ca3af', marginBottom: 6 }}>
+                      <div style={{ fontSize: 12, color: t.textFaint, marginBottom: 6 }}>
                         📅 {new Date(order.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })} às {new Date(order.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                       </div>
-                      {/* Itens do pedido */}
                       {order.order_items.length > 0 && (
                         <div style={{
                           display: 'flex', flexDirection: 'column', gap: 3,
                           padding: '8px 10px', borderRadius: 10,
-                          background: '#f8f8fa',
-                          border: '1px solid #e4e4e7',
+                          background: t.itemsBg,
+                          border: `1px solid ${t.itemsBorder}`,
                         }}>
                           {order.order_items.map((item, i) => (
                             <div key={i} style={{
                               display: 'flex', alignItems: 'center', gap: 6,
-                              fontSize: 12, color: '#3f3f46',
+                              fontSize: 12, color: t.itemText,
                             }}>
                               <span style={{
                                 minWidth: 20, height: 20, borderRadius: 6,
@@ -455,13 +490,14 @@ export default function TVFila() {
         {recentDelivered.length > 0 && (
           <div style={{
             width: 280,
-            borderLeft: '1px solid #e4e4e7',
-            background: '#f8f8fa',
+            borderLeft: `1px solid ${t.sidebarBorder}`,
+            background: t.sidebarBg,
             padding: '30px 24px',
             overflow: 'auto',
+            transition: 'background 0.3s ease',
           }}>
             <h2 style={{
-              fontSize: 13, fontWeight: 700, color: '#a1a1aa',
+              fontSize: 13, fontWeight: 700, color: t.textFaint,
               letterSpacing: '0.12em', textTransform: 'uppercase',
               marginBottom: 20,
             }}>
@@ -474,10 +510,10 @@ export default function TVFila() {
                   border: '1px solid rgba(34,197,94,0.25)',
                   borderRadius: 14, padding: '14px 18px',
                 }}>
-                  <div style={{ fontSize: 11, color: '#a1a1aa', marginBottom: 4 }}>
+                  <div style={{ fontSize: 11, color: t.deliveredId, marginBottom: 4 }}>
                     #{shortId(order.id)}
                   </div>
-                  <div style={{ fontSize: 17, fontWeight: 700, color: '#3f3f46' }}>
+                  <div style={{ fontSize: 17, fontWeight: 700, color: t.deliveredName }}>
                     {order.customer_name}
                   </div>
                   <div style={{ fontSize: 11, color: '#22c55e', marginTop: 4 }}>
