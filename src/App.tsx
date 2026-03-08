@@ -13,6 +13,7 @@ import AdminPedidos from "./pages/admin/AdminPedidos";
 import AdminAcompanhamentos from "./pages/admin/AdminAcompanhamentos";
 import AdminRelatorios from "./pages/admin/AdminRelatorios";
 import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
+import AdminCupons from "./pages/admin/AdminCupons";
 import OrderTracking from "./pages/OrderTracking";
 
 const queryClient = new QueryClient();

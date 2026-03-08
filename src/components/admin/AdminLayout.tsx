@@ -3,7 +3,7 @@ import { useNavigate, NavLink, Outlet } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import {
   ChefHat, Package, ShoppingBag, UtensilsCrossed, LogOut,
-  Menu, X, Store, BarChart2, Settings, Bell, BellOff, BellRing,
+  Menu, X, Store, BarChart2, Settings, Bell, BellOff, BellRing, Tag,
 } from 'lucide-react';
 import logo from '@/assets/logo.png';
 import { usePendingOrders } from '@/hooks/use-pending-orders';
