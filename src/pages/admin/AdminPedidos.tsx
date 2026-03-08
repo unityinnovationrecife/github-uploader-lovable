@@ -66,7 +66,6 @@ export default function AdminPedidos() {
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const { toast } = useToast();
-  const { playNotification } = useOrderSound();
   const isFirstLoad = useRef(true);
 
   const pendingCount = orders.filter((o) => !o.archived && o.status === 'pending').length;
