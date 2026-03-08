@@ -1,4 +1,4 @@
-import { X, Send, MapPin, User, CreditCard, Home, ChevronRight, ShoppingBag, ArrowLeft, Trash2, Banknote, QrCode, Phone } from 'lucide-react';
+import { X, Send, MapPin, User, CreditCard, Home, ChevronRight, ShoppingBag, ArrowLeft, Trash2, Banknote, QrCode, Phone, MessageSquare } from 'lucide-react';
 import { useCartStore } from '@/store/cart-store';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,6 +15,7 @@ export default function CheckoutModal() {
   const [step, setStep] = useState<Step>(1);
   const [nome, setNome] = useState('');
   const [telefone, setTelefone] = useState('');
+  const [observacoes, setObservacoes] = useState('');
   const [rua, setRua] = useState('');
   const [numero, setNumero] = useState('');
   const [referencia, setReferencia] = useState('');
@@ -64,7 +65,8 @@ export default function CheckoutModal() {
           subtotal,
           delivery_fee: deliveryFee,
           total: finalTotal,
-        })
+          notes: observacoes.trim() || null,
+        } as any)
         .select('id')
         .single();
 
@@ -121,6 +123,10 @@ export default function CheckoutModal() {
     if (telefone) ownerLines.push(`📱 Telefone: ${telefone}`);
     ownerLines.push(`🏠 Endereço: ${endereco}`);
     ownerLines.push(`📌 Bairro: ${zoneName}`);
+    if (observacoes.trim()) {
+      ownerLines.push('');
+      ownerLines.push(`📝 *Observações:* ${observacoes.trim()}`);
+    }
     ownerLines.push('');
     ownerLines.push('_Pedido gerado automaticamente pelo site_ 🤖');
 
@@ -140,6 +146,7 @@ export default function CheckoutModal() {
     clientLines.push(`💰 *Total: ${formatPrice(finalTotal)}*`);
     if (deliveryFee === 0) clientLines.push('🛵 Entrega: *Grátis* ✅');
     clientLines.push(`💳 Pagamento: ${pagamento}`);
+    if (observacoes.trim()) clientLines.push(`📝 Obs: ${observacoes.trim()}`);
     clientLines.push('━━━━━━━━━━━━━━━━━━━━━━━');
     clientLines.push('');
     clientLines.push('Em breve entraremos em contato para confirmar. Obrigado! 😊');
@@ -163,7 +170,7 @@ export default function CheckoutModal() {
 
     clearCart();
     closeCheckout();
-    setNome(''); setTelefone(''); setRua(''); setNumero(''); setReferencia(''); setPagamento(''); setZoneKey('');
+    setNome(''); setTelefone(''); setRua(''); setNumero(''); setReferencia(''); setPagamento(''); setZoneKey(''); setObservacoes('');
 
     if (savedOrderId) {
       navigate(`/pedido/${savedOrderId}`);
@@ -433,7 +440,22 @@ export default function CheckoutModal() {
                   <input type="hidden" value={pagamento} required />
                 </div>
 
-                {/* Total com entrega */}
+                {/* Observações */}
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-medium text-[var(--text-muted)] mb-2">
+                    <MessageSquare className="w-4 h-4" />
+                    Observações <span className="text-xs font-normal opacity-60">(opcional)</span>
+                  </label>
+                  <textarea
+                    value={observacoes}
+                    onChange={(e) => setObservacoes(e.target.value)}
+                    maxLength={300}
+                    rows={3}
+                    placeholder="Ex: Ponto de referência, instruções especiais de entrega, preferências..."
+                    className="w-full px-4 py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/25 transition-all resize-none text-sm"
+                  />
+                  <p className="text-xs text-[var(--text-muted)] mt-1 text-right">{observacoes.length}/300</p>
+                </div>
                 {zoneKey && (
                   <div className="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl p-4 space-y-1.5">
                     <div className="flex items-center justify-between text-sm">

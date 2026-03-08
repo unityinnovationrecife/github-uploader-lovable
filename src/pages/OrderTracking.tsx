@@ -40,6 +40,7 @@ type Order = {
   status: string;
   created_at: string;
   customer_phone: string | null;
+  notes?: string | null;
 };
 
 type StatusStep = {
@@ -446,6 +447,17 @@ export default function OrderTracking() {
             <span className="text-[var(--text-primary)] font-semibold text-sm">{order.payment_method}</span>
           </div>
         </div>
+
+        {/* ── Notes ── */}
+        {order.notes && (
+          <div className="bg-[var(--bg-secondary)] border border-orange-500/20 rounded-2xl p-4 space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-base">📝</span>
+              <p className="text-xs font-semibold text-orange-500/80 uppercase tracking-wide">Observações do Pedido</p>
+            </div>
+            <p className="text-sm text-[var(--text-primary)] leading-relaxed">{order.notes}</p>
+          </div>
+        )}
 
         {/* ── Order Items ── */}
         {items.length > 0 && (

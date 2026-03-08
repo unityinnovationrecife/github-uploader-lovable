@@ -29,6 +29,7 @@ type Order = {
   status: string;
   archived: boolean;
   created_at: string;
+  notes?: string | null;
   items?: OrderItem[];
 };
 
@@ -416,6 +417,14 @@ export default function AdminPedidos() {
                           <p className="font-bold text-foreground">Total: {fmt(order.total)}</p>
                         </div>
                       </div>
+
+                      {/* Observações */}
+                      {order.notes && (
+                        <div className="bg-orange-500/5 border border-orange-500/20 rounded-xl p-3">
+                          <p className="text-xs font-semibold text-orange-500/80 uppercase mb-1">📝 Observações</p>
+                          <p className="text-sm text-foreground leading-relaxed">{order.notes}</p>
+                        </div>
+                      )}
 
                       {/* Itens */}
                       <div>
