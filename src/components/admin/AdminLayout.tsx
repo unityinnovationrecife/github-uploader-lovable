@@ -46,6 +46,7 @@ export default function AdminLayout() {
     { to: '/admin/produtos', icon: Package, label: 'Produtos', badge: 0 },
     { to: '/admin/pedidos', icon: ShoppingBag, label: 'Pedidos', badge: pendingCount },
     { to: '/admin/acompanhamentos', icon: UtensilsCrossed, label: 'Acompanhamentos', badge: 0 },
+    { to: '/admin/cupons', icon: Tag, label: 'Cupons', badge: 0 },
     { to: '/admin/relatorios', icon: BarChart2, label: 'Relatórios', badge: 0 },
     { to: '/admin/configuracoes', icon: Settings, label: 'Configurações', badge: 0 },
   ];
