@@ -268,7 +268,7 @@ export default function CheckoutModal() {
 
     clearCart();
     closeCheckout();
-    setNome(''); setTelefone(''); setRua(''); setNumero(''); setReferencia(''); setPagamento(''); setZoneKey(''); setObservacoes(''); setTroco('');
+    setNome(''); setTelefone(''); setRua(''); setNumero(''); setReferencia(''); setPagamento(''); setZoneKey(''); setObservacoes(''); setTroco(''); setAppliedCoupon(null); setCouponInput(''); setCouponError('');
 
     if (savedOrderId) {
       navigate(`/pedido/${savedOrderId}`);
