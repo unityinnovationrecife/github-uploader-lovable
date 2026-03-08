@@ -257,12 +257,12 @@ export default function AdminPedidos() {
             <div className="flex justify-center py-12">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
-          ) : visibleOrders.length === 0 ? (
+          ) : orders.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground bg-card border border-border rounded-2xl">
               {showArchived ? 'Nenhum pedido arquivado.' : 'Nenhum pedido encontrado.'}
             </div>
           ) : (
-            visibleOrders.map((order) => {
+            orders.map((order) => {
               const statusCfg = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
               const StatusIcon = statusCfg.icon;
               const isExpanded = expanded === order.id;
