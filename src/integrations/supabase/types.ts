@@ -303,7 +303,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment_coupon_uses: { Args: { coupon_id: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

@@ -170,12 +170,9 @@ export default function CheckoutModal() {
         }));
         await supabase.from('order_items').insert(orderItems);
 
-        // Increment coupon uses_count
+        // Increment coupon uses_count via RPC-safe increment
         if (appliedCoupon) {
-          await supabase
-            .from('coupons' as any)
-            .update({ uses_count: (appliedCoupon as any).uses_count_raw + 1 } as any)
-            .eq('id', appliedCoupon.id);
+          await supabase.rpc('increment_coupon_uses' as any, { coupon_id: appliedCoupon.id });
         }
       }
     } catch (error) {
