@@ -43,7 +43,9 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         number: EVOLUTION_PHONE,
-        text: message,
+        textMessage: {
+          text: message,
+        },
       }),
     });
 
