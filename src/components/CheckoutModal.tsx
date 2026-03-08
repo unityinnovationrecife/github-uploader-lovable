@@ -65,7 +65,8 @@ export default function CheckoutModal() {
           subtotal,
           delivery_fee: deliveryFee,
           total: finalTotal,
-        })
+          notes: observacoes.trim() || null,
+        } as any)
         .select('id')
         .single();
 
