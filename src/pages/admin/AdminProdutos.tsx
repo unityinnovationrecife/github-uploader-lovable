@@ -18,6 +18,7 @@ type Product = {
   has_acomp: boolean;
   display_order: number;
   visible: boolean;
+  featured: boolean;
 };
 
 const CATEGORIES = ['Coxinhas', 'Salgados', 'Porções', 'Pastel', 'Bebidas'];
