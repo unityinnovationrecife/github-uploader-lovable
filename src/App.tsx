@@ -15,6 +15,7 @@ import AdminRelatorios from "./pages/admin/AdminRelatorios";
 import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
 import AdminCupons from "./pages/admin/AdminCupons";
 import OrderTracking from "./pages/OrderTracking";
+import TVFila from "./pages/TVFila";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/pedido/:id" element={<OrderTracking />} />
+            <Route path="/tv-fila" element={<TVFila />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<Navigate to="/admin/produtos" replace />} />
