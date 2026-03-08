@@ -54,51 +54,87 @@ const STATUS_BADGE: Record<string, string> = {
 const STATUS_FLOW = ['pending', 'confirmed', 'preparing', 'delivering', 'delivered'];
 
 export default function AdminPedidos() {
+  const PAGE_SIZE = 20;
+
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState(0); // 0-indexed
   const [expanded, setExpanded] = useState<string | null>(null);
   const [loadingItems, setLoadingItems] = useState<string | null>(null);
   const [showArchived, setShowArchived] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [search, setSearch] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   const { toast } = useToast();
   const { playNotification } = useOrderSound();
   const isFirstLoad = useRef(true);
 
   const pendingCount = orders.filter((o) => !o.archived && o.status === 'pending').length;
 
-  // Atualiza o título da aba com o contador de pedidos pendentes
+  // Título da aba com contador
   useEffect(() => {
     const base = 'Pedidos | Admin';
-    const title = !loading && pendingCount > 0 ? `(${pendingCount}) ${base}` : base;
-    document.title = title;
+    document.title = !loading && pendingCount > 0 ? `(${pendingCount}) ${base}` : base;
     return () => { document.title = 'G&S Salgados'; };
   }, [pendingCount, loading]);
 
-  const fetchOrders = async () => {
-    const { data } = await supabase
+  // Busca paginada no servidor
+  const fetchOrders = async (pg: number, archived: boolean, status: string, name: string) => {
+    setLoading(true);
+    setExpanded(null);
+
+    let query = supabase
       .from('orders')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .select('*', { count: 'exact' })
+      .eq('archived', archived)
+      .order('created_at', { ascending: false })
+      .range(pg * PAGE_SIZE, pg * PAGE_SIZE + PAGE_SIZE - 1);
+
+    if (status !== 'all') query = query.eq('status', status);
+    if (name.trim()) query = query.ilike('customer_name', `%${name.trim()}%`);
+
+    const { data, count } = await query;
     setOrders((data as Order[]) || []);
+    setTotalCount(count ?? 0);
     setLoading(false);
     isFirstLoad.current = false;
   };
 
+  // Re-fetch quando filtros ou página mudam
   useEffect(() => {
-    fetchOrders();
+    fetchOrders(page, showArchived, statusFilter, search);
+  }, [page, showArchived, statusFilter, search]);
 
+  // Reset para página 0 ao trocar filtros
+  const applyFilter = (newStatus: string, newArchived: boolean) => {
+    setPage(0);
+    setStatusFilter(newStatus);
+    setShowArchived(newArchived);
+  };
+
+  const applySearch = (name: string) => {
+    setPage(0);
+    setSearch(name);
+  };
+
+  // Realtime: novos pedidos prepend na lista (só se na pág 0 e sem filtros ativos)
+  useEffect(() => {
     const channel = supabase
       .channel('admin-orders')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, (payload) => {
         const newOrder = payload.new as Order;
-        setOrders((prev) => [newOrder, ...prev]);
         if (!isFirstLoad.current) {
           playNotification();
           toast({
             title: '🛎️ Novo pedido!',
             description: `${newOrder.customer_name} — ${newOrder.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`,
           });
+          // Prepend apenas se estiver na primeira página de ativos sem filtros
+          if (page === 0 && !showArchived && statusFilter === 'all' && !search) {
+            setOrders((prev) => [newOrder, ...prev.slice(0, PAGE_SIZE - 1)]);
+            setTotalCount((c) => c + 1);
+          }
         }
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, (payload) => {
@@ -109,7 +145,7 @@ export default function AdminPedidos() {
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, []);
+  }, [page, showArchived, statusFilter, search]);
 
   const toggleExpand = async (order: Order) => {
     if (expanded === order.id) { setExpanded(null); return; }
@@ -138,7 +174,9 @@ export default function AdminPedidos() {
     if (error) {
       toast({ title: 'Erro ao arquivar', variant: 'destructive' });
     } else {
-      setOrders(prev => prev.map(o => o.id === order.id ? { ...o, archived: newVal } : o));
+      // Remove da lista atual (mudou de aba)
+      setOrders(prev => prev.filter(o => o.id !== order.id));
+      setTotalCount(c => c - 1);
       toast({ title: newVal ? '📦 Pedido arquivado' : '📂 Pedido restaurado' });
       if (expanded === order.id) setExpanded(null);
     }
