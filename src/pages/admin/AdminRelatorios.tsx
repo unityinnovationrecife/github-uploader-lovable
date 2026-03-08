@@ -353,6 +353,10 @@ export default function AdminRelatorios() {
                   <FileSpreadsheet className="w-4 h-4 text-green-600" />
                   CSV – Produtos vendidos
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleExport('csv-coupons')} className="gap-2 cursor-pointer" disabled={couponStats.length === 0}>
+                  <FileSpreadsheet className="w-4 h-4 text-green-600" />
+                  CSV – Cupons de desconto
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleExport('pdf')} className="gap-2 cursor-pointer">
                   <FileText className="w-4 h-4 text-red-500" />
                   PDF – Imprimir / salvar
