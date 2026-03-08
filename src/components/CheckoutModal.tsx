@@ -15,6 +15,7 @@ export default function CheckoutModal() {
   const [step, setStep] = useState<Step>(1);
   const [nome, setNome] = useState('');
   const [telefone, setTelefone] = useState('');
+  const [observacoes, setObservacoes] = useState('');
   const [rua, setRua] = useState('');
   const [numero, setNumero] = useState('');
   const [referencia, setReferencia] = useState('');
