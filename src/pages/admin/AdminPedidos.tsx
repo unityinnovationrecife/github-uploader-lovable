@@ -153,6 +153,14 @@ export default function AdminPedidos() {
     }
   };
 
+  const STATUS_WA_MESSAGES: Record<string, string> = {
+    confirmed:  '✅ *Pedido Confirmado!* Seu pedido foi confirmado e em breve começará a ser preparado. 🍢',
+    preparing:  '👨‍🍳 *Seu pedido está sendo preparado!* Estamos cuidando do seu pedido com todo carinho. Em breve sai para entrega! 🍢',
+    delivering: '🛵 *Seu pedido saiu para entrega!* O entregador já está a caminho. Fique de olho! 📍',
+    delivered:  '🎉 *Pedido Entregue!* Esperamos que esteja delicioso! Obrigado pela preferência. 😊\n\n*G&S Salgados* 🍢',
+    cancelled:  '❌ *Seu pedido foi cancelado.* Em caso de dúvidas, entre em contato conosco. Sentimos muito pelo inconveniente.',
+  };
+
   const updateStatus = async (id: string, status: string) => {
     const { error } = await supabase.from('orders').update({ status }).eq('id', id);
     if (error) {
@@ -160,6 +168,20 @@ export default function AdminPedidos() {
     } else {
       setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
       toast({ title: 'Status atualizado!' });
+
+      // Enviar WhatsApp automático ao cliente
+      const order = orders.find(o => o.id === id);
+      const waMsg = STATUS_WA_MESSAGES[status];
+      if (order?.customer_phone && waMsg) {
+        const customerMessage = `Olá, *${order.customer_name}*! 👋\n\n${waMsg}\n\n*Pedido #${order.id.slice(-6).toUpperCase()}* • Total: ${order.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}\n\nAcompanhe seu pedido em: ${window.location.origin}/pedido/${order.id}`;
+        supabase.functions.invoke('send-whatsapp', {
+          body: {
+            customerPhone: order.customer_phone,
+            customerMessage,
+            skipOwner: true,
+          },
+        }).catch(console.warn);
+      }
     }
   };
 
