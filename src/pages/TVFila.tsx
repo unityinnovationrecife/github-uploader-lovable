@@ -272,59 +272,72 @@ export default function TVFila() {
           ) : (
             <div
               style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                gap: 20,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 14,
               }}
             >
-              {orders.map(order => {
+              {orders.map((order, index) => {
                 const info = getStatusInfo(order.status);
+                const isFirst = index === 0;
                 return (
                   <div
                     key={order.id}
                     style={{
-                      background: 'rgba(255,255,255,0.04)',
-                      border: `2px solid ${info.color}50`,
-                      borderRadius: 20,
-                      padding: '24px 28px',
+                      background: isFirst ? 'rgba(249,115,22,0.07)' : 'rgba(255,255,255,0.04)',
+                      border: `2px solid ${isFirst ? '#f97316' : info.color}${isFirst ? '80' : '40'}`,
+                      borderRadius: 18,
+                      padding: '20px 24px',
                       position: 'relative',
                       overflow: 'hidden',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 20,
                       transition: 'all 0.3s ease',
                     }}
                   >
-                    {/* Glow top */}
+                    {/* Glow left */}
                     <div style={{
-                      position: 'absolute', top: 0, left: 0, right: 0, height: 3,
-                      background: `linear-gradient(90deg, transparent, ${info.color}, transparent)`,
+                      position: 'absolute', top: 0, left: 0, bottom: 0, width: 3,
+                      background: `linear-gradient(180deg, transparent, ${info.color}, transparent)`,
                     }} />
 
-                    {/* Order number */}
+                    {/* Position badge */}
                     <div style={{
-                      display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
-                      marginBottom: 12,
+                      width: 48, height: 48, borderRadius: '50%', flexShrink: 0,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      background: isFirst ? '#f97316' : 'rgba(255,255,255,0.08)',
+                      color: isFirst ? '#fff' : '#71717a',
+                      fontSize: 20, fontWeight: 900,
                     }}>
-                      <span style={{
-                        fontSize: 13, fontWeight: 700, color: '#71717a',
-                        letterSpacing: '0.1em', textTransform: 'uppercase',
-                      }}>
-                        Pedido #{shortId(order.id)}
-                      </span>
-                      <span style={{
-                        fontSize: 11, color: '#52525b',
-                      }}>
-                        {new Date(order.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                      </span>
+                      {index + 1}º
                     </div>
 
-                    {/* Customer name */}
-                    <div style={{ fontSize: 26, fontWeight: 800, marginBottom: 16, lineHeight: 1.1 }}>
-                      {order.customer_name}
+                    {/* Info */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                        <span style={{ fontSize: 22, fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {order.customer_name}
+                        </span>
+                        {isFirst && (
+                          <span style={{
+                            fontSize: 11, fontWeight: 700, color: '#f97316',
+                            background: 'rgba(249,115,22,0.15)', border: '1px solid rgba(249,115,22,0.4)',
+                            padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap',
+                          }}>
+                            ⏱ Primeiro da fila
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ fontSize: 12, color: '#52525b' }}>
+                        Pedido #{shortId(order.id)} · {new Date(order.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                      </div>
                     </div>
 
                     {/* Status badge */}
                     <div style={{
                       display: 'inline-flex', alignItems: 'center', gap: 8,
-                      padding: '8px 16px', borderRadius: 999,
+                      padding: '8px 16px', borderRadius: 999, flexShrink: 0,
                       background: info.bgColor,
                       border: `1px solid ${info.color}60`,
                     }}>
