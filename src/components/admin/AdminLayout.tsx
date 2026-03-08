@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, NavLink, Outlet } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { ChefHat, Package, ShoppingBag, UtensilsCrossed, LogOut, Menu, X, Store, BarChart2 } from 'lucide-react';
+import { ChefHat, Package, ShoppingBag, UtensilsCrossed, LogOut, Menu, X, Store, BarChart2, Settings } from 'lucide-react';
 import logo from '@/assets/logo.png';
 
 export default function AdminLayout() {
@@ -40,6 +40,7 @@ export default function AdminLayout() {
     { to: '/admin/pedidos', icon: ShoppingBag, label: 'Pedidos' },
     { to: '/admin/acompanhamentos', icon: UtensilsCrossed, label: 'Acompanhamentos' },
     { to: '/admin/relatorios', icon: BarChart2, label: 'Relatórios' },
+    { to: '/admin/configuracoes', icon: Settings, label: 'Configurações' },
   ];
 
   return (

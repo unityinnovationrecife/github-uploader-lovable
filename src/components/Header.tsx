@@ -3,45 +3,29 @@ import { useCartStore } from '@/store/cart-store';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import logo from '@/assets/logo.png';
-
-function getStoreStatus() {
-  const now = new Date();
-  const day = now.getDay(); // 0=Dom, 1=Seg, ..., 5=Sex, 6=Sáb
-  const hour = now.getHours();
-  const minute = now.getMinutes();
-  const time = hour + minute / 60;
-
-  const isWeekend = day === 0 || day === 6; // Dom ou Sáb
-
-  if (isWeekend) {
-    // Sáb e Dom: 17h às 00h
-    const open = time >= 17;
-    const closingSoon = time >= 23;
-    return { isOpen: open, closingSoon, hours: 'Sáb e Dom: 17h às 00h' };
-  } else {
-    // Seg a Sex: 19h às 23h
-    const open = time >= 19 && time < 23;
-    const closingSoon = time >= 22.5;
-    return { isOpen: open, closingSoon, hours: 'Seg a Sex: 19h às 23h' };
-  }
-}
+import { useStoreHours, getStoreStatusFromHours } from '@/hooks/use-store-settings';
 
 export default function Header() {
   const { toggleCart, getTotalItems } = useCartStore();
   const { theme, setTheme } = useTheme();
   const [totalItems, setTotalItems] = useState(0);
   const [mounted, setMounted] = useState(false);
-  const [storeStatus, setStoreStatus] = useState(getStoreStatus());
   const [showBanner, setShowBanner] = useState(true);
+  const { hours } = useStoreHours();
+  const [storeStatus, setStoreStatus] = useState(getStoreStatusFromHours([]));
 
   useEffect(() => {
     setMounted(true);
-    // Atualiza o status a cada minuto
+  }, []);
+
+  // Recalcula o status ao carregar os horários e a cada minuto
+  useEffect(() => {
+    setStoreStatus(getStoreStatusFromHours(hours));
     const interval = setInterval(() => {
-      setStoreStatus(getStoreStatus());
+      setStoreStatus(getStoreStatusFromHours(hours));
     }, 60_000);
     return () => clearInterval(interval);
-  }, []);
+  }, [hours]);
 
   useEffect(() => {
     if (mounted) {
