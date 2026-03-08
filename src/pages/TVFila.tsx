@@ -390,11 +390,16 @@ export default function TVFila() {
         )}
       </div>
 
-      {/* Pulse animation */}
+      {/* Animations */}
       <style>{`
         @keyframes tv-pulse {
           0%, 100% { opacity: 1; transform: scale(1); }
           50% { opacity: 0.4; transform: scale(0.8); }
+        }
+        @keyframes tv-flash {
+          0%   { opacity: 1; }
+          50%  { opacity: 0.6; }
+          100% { opacity: 0; }
         }
       `}</style>
     </div>
