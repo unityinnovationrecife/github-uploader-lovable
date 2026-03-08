@@ -28,12 +28,13 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // message       — mensagem para o lojista (obrigatória)
-    // customerPhone — número do cliente, ex: "5581999990000" (opcional)
+    // message         — mensagem para o lojista (obrigatória, a menos que skipOwner=true)
+    // customerPhone   — número do cliente, ex: "5581999990000" (opcional)
     // customerMessage — mensagem de confirmação para o cliente (opcional)
-    const { message, customerPhone, customerMessage } = await req.json();
+    // skipOwner       — se true, não envia para o lojista (usado em notificações de status)
+    const { message, customerPhone, customerMessage, skipOwner } = await req.json();
 
-    if (!message) {
+    if (!skipOwner && !message) {
       return new Response(JSON.stringify({ error: 'message is required' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -54,15 +55,17 @@ Deno.serve(async (req) => {
 
     const baseUrl = EVOLUTION_API_URL.replace(/\/+$/, '');
 
-    // 1) Enviar para o lojista (sempre)
-    const ownerResult = await sendMessage(baseUrl, EVOLUTION_INSTANCE, EVOLUTION_API_KEY, EVOLUTION_PHONE, message);
-
-    if (!ownerResult.ok) {
-      console.error('Evolution API error (owner):', ownerResult.status, ownerResult.body);
-      return new Response(JSON.stringify({ error: 'Evolution API error', details: ownerResult.body }), {
-        status: ownerResult.status,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    // 1) Enviar para o lojista (apenas se skipOwner não for true)
+    let ownerResult = null;
+    if (!skipOwner && message) {
+      ownerResult = await sendMessage(baseUrl, EVOLUTION_INSTANCE, EVOLUTION_API_KEY, EVOLUTION_PHONE, message);
+      if (!ownerResult.ok) {
+        console.error('Evolution API error (owner):', ownerResult.status, ownerResult.body);
+        return new Response(JSON.stringify({ error: 'Evolution API error', details: ownerResult.body }), {
+          status: ownerResult.status,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
     }
 
     // 2) Enviar para o cliente (se número e mensagem fornecidos)
