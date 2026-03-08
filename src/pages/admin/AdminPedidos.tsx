@@ -179,6 +179,111 @@ export default function AdminPedidos() {
   const fmt = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   const fmtDate = (d: string) => new Date(d).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
 
+  const printOrder = (order: Order) => {
+    const items = order.items || [];
+    const statusLabel = STATUS_CONFIG[order.status]?.label ?? order.status;
+
+    const itemsHtml = items.map(item => `
+      <tr>
+        <td style="padding:3px 0;vertical-align:top">${item.quantity}x ${item.product_name}</td>
+        <td style="padding:3px 0;text-align:right;vertical-align:top;white-space:nowrap">${fmt(item.unit_price * item.quantity)}</td>
+      </tr>
+      ${item.selected_flavors?.length ? `<tr><td colspan="2" style="padding:0 0 2px 8px;font-size:10px;color:#555">Sabores: ${item.selected_flavors.join(', ')}</td></tr>` : ''}
+      ${item.selected_acomp?.length ? `<tr><td colspan="2" style="padding:0 0 4px 8px;font-size:10px;color:#555">Acomp: ${item.selected_acomp.join(', ')}</td></tr>` : ''}
+    `).join('');
+
+    const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Pedido #${order.id.slice(-6).toUpperCase()}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 12px;
+      width: 80mm;
+      max-width: 80mm;
+      padding: 6mm 4mm;
+      color: #000;
+      background: #fff;
+    }
+    .center { text-align: center; }
+    .bold { font-weight: bold; }
+    .divider { border-top: 1px dashed #000; margin: 6px 0; }
+    .title { font-size: 15px; font-weight: bold; text-align: center; margin-bottom: 2px; }
+    .subtitle { font-size: 10px; text-align: center; color: #444; margin-bottom: 6px; }
+    table { width: 100%; border-collapse: collapse; }
+    .total-row td { font-weight: bold; font-size: 13px; padding-top: 4px; }
+    .label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: #555; margin-bottom: 1px; }
+    .footer { text-align: center; font-size: 10px; color: #555; margin-top: 8px; }
+    @media print {
+      @page { size: 80mm auto; margin: 0; }
+      body { padding: 4mm 3mm; }
+    }
+  </style>
+</head>
+<body>
+  <div class="title">G&amp;S Salgados</div>
+  <div class="subtitle">Pedido #${order.id.slice(-6).toUpperCase()} &bull; ${fmtDate(order.created_at)}</div>
+  <div class="divider"></div>
+
+  <div class="label">Cliente</div>
+  <div class="bold">${order.customer_name}</div>
+  ${order.customer_phone ? `<div>${order.customer_phone}</div>` : ''}
+
+  <div class="divider"></div>
+
+  <div class="label">Endereço de entrega</div>
+  <div>${order.address}</div>
+  <div>${order.delivery_zone_name}</div>
+
+  <div class="divider"></div>
+
+  <div class="label">Itens do pedido</div>
+  <table>
+    ${itemsHtml}
+  </table>
+
+  <div class="divider"></div>
+
+  <table>
+    <tr>
+      <td>Subtotal</td>
+      <td style="text-align:right">${fmt(order.subtotal)}</td>
+    </tr>
+    ${order.delivery_fee > 0 ? `<tr><td>Taxa de entrega</td><td style="text-align:right">${fmt(order.delivery_fee)}</td></tr>` : ''}
+    <tr class="total-row">
+      <td>TOTAL</td>
+      <td style="text-align:right">${fmt(order.total)}</td>
+    </tr>
+  </table>
+
+  <div class="divider"></div>
+
+  <div class="label">Pagamento</div>
+  <div>${order.payment_method}</div>
+
+  <div class="divider"></div>
+
+  <div class="label">Status</div>
+  <div class="bold">${statusLabel}</div>
+
+  <div class="footer">
+    Obrigado pela preferência!<br/>
+    G&amp;S Salgados
+  </div>
+</body>
+</html>`;
+
+    const win = window.open('', '_blank', 'width=400,height=700');
+    if (!win) return;
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+    setTimeout(() => { win.print(); }, 300);
+  };
+
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   return (
