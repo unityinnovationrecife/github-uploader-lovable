@@ -62,9 +62,10 @@ export default function AdminPedidos() {
   // Atualiza o título da aba com o contador de pedidos pendentes
   useEffect(() => {
     const base = 'Pedidos | Admin';
-    document.title = pendingCount > 0 ? `(${pendingCount}) ${base}` : base;
-    return () => { document.title = 'Admin | G&S Salgados'; };
-  }, [pendingCount]);
+    const title = !loading && pendingCount > 0 ? `(${pendingCount}) ${base}` : base;
+    document.title = title;
+    return () => { document.title = 'G&S Salgados'; };
+  }, [pendingCount, loading]);
 
   const fetchOrders = async () => {
     const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
