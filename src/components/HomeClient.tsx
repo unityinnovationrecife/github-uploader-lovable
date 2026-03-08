@@ -22,10 +22,11 @@ export default function HomeClient() {
   useEffect(() => {
     async function fetchData() {
       try {
+        // Busca TODOS os produtos (visíveis e esgotados), excluindo apenas os ocultos permanentemente
+        // visible=true → disponível | visible=false → esgotado (aparece com badge)
         const { data: rawProducts } = await supabase
           .from('products')
           .select('*')
-          .eq('visible', true)
           .order('display_order', { ascending: true });
 
         const { data: rawAcomp } = await supabase
@@ -45,6 +46,7 @@ export default function HomeClient() {
           maxFlavors: p.max_flavors || undefined,
           availableFlavors: p.available_flavors || undefined,
           allowDuplicateFlavors: p.allow_duplicate_flavors || false,
+          available: p.visible !== false, // visible=false → esgotado
         }));
 
         setProducts(mapped);

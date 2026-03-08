@@ -206,23 +206,35 @@ export default function AdminProdutos() {
                     <tr className="border-b border-border bg-muted/20">
                       <th className="text-left px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase">Produto</th>
                       <th className="text-left px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase">Preço</th>
-                      <th className="text-left px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase hidden md:table-cell">Ordem</th>
+                      <th className="text-center px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase hidden sm:table-cell">Disponível</th>
                       <th className="px-4 py-2.5" />
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
                     {group.map((p) => (
-                       <tr key={p.id} className={`hover:bg-muted/30 transition-colors ${!p.visible ? 'opacity-50' : ''}`}>
+                      <tr key={p.id} className={`hover:bg-muted/30 transition-colors ${!p.visible ? 'bg-red-500/5' : ''}`}>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
                             {p.image ? (
-                              <img src={p.image} alt={p.name} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+                              <div className="relative flex-shrink-0">
+                                <img src={p.image} alt={p.name} className={`w-10 h-10 rounded-lg object-cover ${!p.visible ? 'grayscale opacity-60' : ''}`} />
+                                {!p.visible && (
+                                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold px-1 rounded-full">
+                                    Esgt
+                                  </span>
+                                )}
+                              </div>
                             ) : (
-                              <span className="text-xl w-10 h-10 flex items-center justify-center">{p.emoji}</span>
+                              <span className={`text-xl w-10 h-10 flex items-center justify-center ${!p.visible ? 'grayscale opacity-60' : ''}`}>{p.emoji}</span>
                             )}
                             <div>
-                              <p className="font-medium text-foreground text-sm">{p.name}</p>
+                              <p className={`font-medium text-sm ${p.visible ? 'text-foreground' : 'text-muted-foreground line-through'}`}>{p.name}</p>
                               <p className="text-xs text-muted-foreground line-clamp-1">{p.description}</p>
+                              {!p.visible && (
+                                <span className="inline-block mt-0.5 text-[10px] font-semibold text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded-full">
+                                  Esgotado na loja
+                                </span>
+                              )}
                             </div>
                           </div>
                         </td>
@@ -231,15 +243,35 @@ export default function AdminProdutos() {
                             {Number(p.price).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                           </span>
                         </td>
-                        <td className="px-4 py-3 hidden md:table-cell text-muted-foreground text-sm">{p.display_order}</td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-2 justify-end">
-                            {/* Switch visível */}
+                        {/* Toggle Disponível/Esgotado */}
+                        <td className="px-4 py-3 hidden sm:table-cell text-center">
+                          <div className="flex flex-col items-center gap-1">
                             <button
                               onClick={() => toggleVisible(p.id, p.visible ?? true)}
-                              title={p.visible ? 'Ocultar da loja' : 'Mostrar na loja'}
-                              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${
-                                p.visible ? 'bg-primary' : 'bg-muted-foreground/30'
+                              title={p.visible ? 'Marcar como Esgotado' : 'Marcar como Disponível'}
+                              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                                p.visible ? 'bg-green-500' : 'bg-red-400'
+                              }`}
+                            >
+                              <span
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-md transition-transform duration-200 ${
+                                  p.visible ? 'translate-x-6' : 'translate-x-1'
+                                }`}
+                              />
+                            </button>
+                            <span className={`text-[10px] font-semibold ${p.visible ? 'text-green-600' : 'text-red-500'}`}>
+                              {p.visible ? 'Disponível' : 'Esgotado'}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2 justify-end">
+                            {/* Toggle mobile (só aparece em telas pequenas) */}
+                            <button
+                              onClick={() => toggleVisible(p.id, p.visible ?? true)}
+                              title={p.visible ? 'Marcar como Esgotado' : 'Marcar como Disponível'}
+                              className={`sm:hidden relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${
+                                p.visible ? 'bg-green-500' : 'bg-red-400'
                               }`}
                             >
                               <span
