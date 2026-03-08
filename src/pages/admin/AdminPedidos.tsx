@@ -57,6 +57,15 @@ export default function AdminPedidos() {
   const { playNotification } = useOrderSound();
   const isFirstLoad = useRef(true);
 
+  const pendingCount = orders.filter((o) => o.status === 'pending').length;
+
+  // Atualiza o título da aba com o contador de pedidos pendentes
+  useEffect(() => {
+    const base = 'Pedidos | Admin';
+    document.title = pendingCount > 0 ? `(${pendingCount}) ${base}` : base;
+    return () => { document.title = 'Admin | G&S Salgados'; };
+  }, [pendingCount]);
+
   const fetchOrders = async () => {
     const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
     setOrders(data || []);
