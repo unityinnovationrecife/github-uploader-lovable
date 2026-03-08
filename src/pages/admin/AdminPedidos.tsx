@@ -29,6 +29,7 @@ type Order = {
   status: string;
   archived: boolean;
   created_at: string;
+  notes?: string | null;
   items?: OrderItem[];
 };
 
