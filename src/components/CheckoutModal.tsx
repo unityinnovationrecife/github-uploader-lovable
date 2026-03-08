@@ -671,6 +671,15 @@ export default function CheckoutModal() {
                       <span className="text-[var(--text-secondary)]">Subtotal</span>
                       <span className="text-[var(--text-muted)] font-medium">{formatPrice(subtotal)}</span>
                     </div>
+                    {appliedCoupon && (
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-green-600 flex items-center gap-1.5">
+                          <Tag className="w-3.5 h-3.5" />
+                          Cupom {appliedCoupon.code}
+                        </span>
+                        <span className="text-green-600 font-medium">-{formatPrice(discountAmount)}</span>
+                      </div>
+                    )}
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-[var(--text-secondary)]">Taxa de entrega</span>
                       <span className={deliveryFee === 0 ? 'text-green-500 font-medium' : 'text-[var(--text-muted)] font-medium'}>
