@@ -291,7 +291,7 @@ export default function TVFila() {
 
           {/* Dark/Light toggle */}
           <button
-            onClick={() => setDark(v => !v)}
+            onClick={() => setDark(v => { const next = !v; localStorage.setItem('tv-fila-theme', next ? 'dark' : 'light'); return next; })}
             title={dark ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
             style={{
               width: 40, height: 40, borderRadius: '50%', cursor: 'pointer',
