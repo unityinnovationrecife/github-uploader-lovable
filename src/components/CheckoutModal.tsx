@@ -1,9 +1,9 @@
-import { X, Send, MapPin, User, CreditCard, Home, ChevronRight, ShoppingBag, ArrowLeft, Trash2, Banknote, QrCode, Phone, MessageSquare } from 'lucide-react';
+import { X, Send, MapPin, User, CreditCard, Home, ChevronRight, ShoppingBag, ArrowLeft, Trash2, Banknote, QrCode, Phone, MessageSquare, Clock, AlertCircle } from 'lucide-react';
 import { useCartStore } from '@/store/cart-store';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
-import { useDeliveryZones } from '@/hooks/use-store-settings';
+import { useDeliveryZones, useStoreHours, getStoreStatusFromHours } from '@/hooks/use-store-settings';
 
 type Step = 1 | 2;
 
@@ -11,6 +11,7 @@ export default function CheckoutModal() {
   const { items, isCheckoutOpen, closeCheckout, getTotalPrice, clearCart, removeItem } = useCartStore();
   const navigate = useNavigate();
   const { zones, loading: zonesLoading } = useDeliveryZones();
+  const { hours, loading: hoursLoading } = useStoreHours();
 
   const [step, setStep] = useState<Step>(1);
   const [nome, setNome] = useState('');
@@ -21,6 +22,7 @@ export default function CheckoutModal() {
   const [referencia, setReferencia] = useState('');
   const [pagamento, setPagamento] = useState('');
   const [zoneKey, setZoneKey] = useState('');
+  const [troco, setTroco] = useState('');
   const [mounted, setMounted] = useState(false);
 
   const selectedZone = zones.find(z => z.key === zoneKey);
@@ -39,6 +41,9 @@ export default function CheckoutModal() {
 
   if (!mounted) return null;
 
+  const storeStatus = !hoursLoading ? getStoreStatusFromHours(hours) : null;
+  const isStoreClosed = storeStatus !== null && !storeStatus.isOpen;
+
   const formatPrice = (price: number) =>
     price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -49,6 +54,13 @@ export default function CheckoutModal() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!zoneKey) { alert('Por favor, selecione seu bairro/condomínio para entrega.'); return; }
+
+    // Build notes: merge observações + troco
+    let notasFinal = observacoes.trim();
+    if (pagamento === 'Dinheiro' && troco.trim()) {
+      const trocoNote = `Troco para: ${troco.trim()}`;
+      notasFinal = notasFinal ? `${notasFinal} | ${trocoNote}` : trocoNote;
+    }
 
     let savedOrderId: string | null = null;
 
@@ -65,7 +77,7 @@ export default function CheckoutModal() {
           subtotal,
           delivery_fee: deliveryFee,
           total: finalTotal,
-          notes: observacoes.trim() || null,
+          notes: notasFinal || null,
         } as any)
         .select('id')
         .single();
@@ -114,6 +126,7 @@ export default function CheckoutModal() {
       ownerLines.push(`🛵 Entrega (${zoneName}): *Grátis* ✅`);
     }
     ownerLines.push(`💳 Pagamento: ${pagamento}`);
+    if (pagamento === 'Dinheiro' && troco.trim()) ownerLines.push(`💵 Troco para: ${troco.trim()}`);
     ownerLines.push('');
     ownerLines.push(`✅ *TOTAL: ${formatPrice(finalTotal)}*`);
     ownerLines.push('━━━━━━━━━━━━━━━━━━━━━━━');
@@ -123,9 +136,9 @@ export default function CheckoutModal() {
     if (telefone) ownerLines.push(`📱 Telefone: ${telefone}`);
     ownerLines.push(`🏠 Endereço: ${endereco}`);
     ownerLines.push(`📌 Bairro: ${zoneName}`);
-    if (observacoes.trim()) {
+    if (notasFinal) {
       ownerLines.push('');
-      ownerLines.push(`📝 *Observações:* ${observacoes.trim()}`);
+      ownerLines.push(`📝 *Observações:* ${notasFinal}`);
     }
     ownerLines.push('');
     ownerLines.push('_Pedido gerado automaticamente pelo site_ 🤖');
@@ -146,7 +159,8 @@ export default function CheckoutModal() {
     clientLines.push(`💰 *Total: ${formatPrice(finalTotal)}*`);
     if (deliveryFee === 0) clientLines.push('🛵 Entrega: *Grátis* ✅');
     clientLines.push(`💳 Pagamento: ${pagamento}`);
-    if (observacoes.trim()) clientLines.push(`📝 Obs: ${observacoes.trim()}`);
+    if (pagamento === 'Dinheiro' && troco.trim()) clientLines.push(`💵 Troco para: ${troco.trim()}`);
+    if (notasFinal) clientLines.push(`📝 Obs: ${notasFinal}`);
     clientLines.push('━━━━━━━━━━━━━━━━━━━━━━━');
     clientLines.push('');
     clientLines.push('Em breve entraremos em contato para confirmar. Obrigado! 😊');
@@ -170,7 +184,7 @@ export default function CheckoutModal() {
 
     clearCart();
     closeCheckout();
-    setNome(''); setTelefone(''); setRua(''); setNumero(''); setReferencia(''); setPagamento(''); setZoneKey(''); setObservacoes('');
+    setNome(''); setTelefone(''); setRua(''); setNumero(''); setReferencia(''); setPagamento(''); setZoneKey(''); setObservacoes(''); setTroco('');
 
     if (savedOrderId) {
       navigate(`/pedido/${savedOrderId}`);
@@ -230,8 +244,33 @@ export default function CheckoutModal() {
           {/* Content */}
           <div className="overflow-y-auto flex-1">
 
+            {/* ── STORE CLOSED BANNER ── */}
+            {isStoreClosed && (
+              <div className="mx-5 mt-5 bg-red-500/10 border border-red-500/30 rounded-2xl p-5 flex flex-col items-center text-center gap-3">
+                <div className="w-14 h-14 rounded-full bg-red-500/15 flex items-center justify-center">
+                  <Clock className="w-7 h-7 text-red-500" />
+                </div>
+                <div>
+                  <p className="font-bold text-[var(--text-primary)] text-base">Estamos fechados no momento</p>
+                  <p className="text-sm text-[var(--text-muted)] mt-1">Não é possível realizar pedidos fora do horário de funcionamento.</p>
+                </div>
+                <div className="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl px-4 py-3 w-full">
+                  <div className="flex items-center gap-2 justify-center">
+                    <AlertCircle className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                    <p className="text-sm font-medium text-[var(--text-primary)]">{storeStatus?.hours}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={closeCheckout}
+                  className="w-full py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-secondary)] font-medium text-sm hover:opacity-80 transition-all"
+                >
+                  Voltar ao cardápio
+                </button>
+              </div>
+            )}
+
             {/* ── STEP 1: Order Summary ── */}
-            {step === 1 && (
+            {!isStoreClosed && step === 1 && (
               <div className="p-5 space-y-4">
                 {/* Items */}
                 <div className="space-y-2">
@@ -305,7 +344,7 @@ export default function CheckoutModal() {
             )}
 
             {/* ── STEP 2: Delivery + Payment ── */}
-            {step === 2 && (
+            {!isStoreClosed && step === 2 && (
               <form onSubmit={handleSubmit} className="p-5 space-y-4">
                 {/* Nome */}
                 <div>
@@ -429,7 +468,7 @@ export default function CheckoutModal() {
                       <button
                         key={value}
                         type="button"
-                        onClick={() => setPagamento(value)}
+                        onClick={() => { setPagamento(value); if (value !== 'Dinheiro') setTroco(''); }}
                         className={`flex items-center gap-2 px-3 py-3 rounded-xl border transition-all text-sm font-medium ${pagamento === value ? 'border-orange-500 bg-orange-500/10 text-orange-500' : 'border-[var(--border-color)] bg-[var(--bg-primary)] text-[var(--text-primary)] hover:border-orange-500/40'}`}
                       >
                         {icon}
@@ -439,6 +478,23 @@ export default function CheckoutModal() {
                   </div>
                   <input type="hidden" value={pagamento} required />
                 </div>
+
+                {/* Troco — apenas para Dinheiro */}
+                {pagamento === 'Dinheiro' && (
+                  <div>
+                    <label className="flex items-center gap-2 text-sm font-medium text-[var(--text-muted)] mb-2">
+                      <Banknote className="w-4 h-4" />
+                      Troco para quanto? <span className="text-xs font-normal opacity-60">(opcional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={troco}
+                      onChange={(e) => setTroco(e.target.value)}
+                      placeholder="Ex: R$ 50,00 · ou deixe vazio se não precisar"
+                      className="w-full px-4 py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/25 transition-all"
+                    />
+                  </div>
+                )}
 
                 {/* Observações */}
                 <div>
@@ -456,6 +512,7 @@ export default function CheckoutModal() {
                   />
                   <p className="text-xs text-[var(--text-muted)] mt-1 text-right">{observacoes.length}/300</p>
                 </div>
+
                 {zoneKey && (
                   <div className="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl p-4 space-y-1.5">
                     <div className="flex items-center justify-between text-sm">
