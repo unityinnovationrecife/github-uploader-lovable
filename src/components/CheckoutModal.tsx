@@ -146,6 +146,7 @@ export default function CheckoutModal() {
     clientLines.push(`💰 *Total: ${formatPrice(finalTotal)}*`);
     if (deliveryFee === 0) clientLines.push('🛵 Entrega: *Grátis* ✅');
     clientLines.push(`💳 Pagamento: ${pagamento}`);
+    if (observacoes.trim()) clientLines.push(`📝 Obs: ${observacoes.trim()}`);
     clientLines.push('━━━━━━━━━━━━━━━━━━━━━━━');
     clientLines.push('');
     clientLines.push('Em breve entraremos em contato para confirmar. Obrigado! 😊');
