@@ -98,10 +98,10 @@ export default function HomeClient() {
       <Header />
       <HeroBanner />
 
-      {/* Wave divider */}
-      <div className="overflow-hidden leading-none -mt-1 bg-[var(--bg-secondary)]">
-        <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" className="w-full h-10 sm:h-14 block fill-zinc-900 dark:fill-zinc-900">
-          <path d="M0,30 C240,60 480,0 720,30 C960,60 1200,0 1440,30 L1440,0 L0,0 Z" />
+      {/* Wave divider: hero (zinc-900) → bg-secondary */}
+      <div className="relative overflow-hidden -mt-1" style={{ background: 'var(--bg-secondary)' }}>
+        <svg viewBox="0 0 1440 56" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" className="w-full h-10 sm:h-14 block" style={{ fill: '#18181b' }}>
+          <path d="M0,28 C360,56 1080,0 1440,28 L1440,0 L0,0 Z" />
         </svg>
       </div>
 
