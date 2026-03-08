@@ -123,6 +123,10 @@ export default function CheckoutModal() {
     if (telefone) ownerLines.push(`📱 Telefone: ${telefone}`);
     ownerLines.push(`🏠 Endereço: ${endereco}`);
     ownerLines.push(`📌 Bairro: ${zoneName}`);
+    if (observacoes.trim()) {
+      ownerLines.push('');
+      ownerLines.push(`📝 *Observações:* ${observacoes.trim()}`);
+    }
     ownerLines.push('');
     ownerLines.push('_Pedido gerado automaticamente pelo site_ 🤖');
 
