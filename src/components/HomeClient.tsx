@@ -2,6 +2,9 @@ import { useState, useMemo, useEffect } from 'react';
 import { Search, X } from 'lucide-react';
 import Header from '@/components/Header';
 import HeroBanner from '@/components/HeroBanner';
+import HowItWorks from '@/components/HowItWorks';
+import ClosedStoreBanner from '@/components/ClosedStoreBanner';
+import WhatsAppButton from '@/components/WhatsAppButton';
 import CategoryFilter from '@/components/CategoryFilter';
 import ProductCard from '@/components/ProductCard';
 import CartSidebar from '@/components/CartSidebar';
@@ -94,6 +97,19 @@ export default function HomeClient() {
     <div className="min-h-screen bg-[var(--bg-primary)] transition-colors duration-300">
       <Header />
       <HeroBanner />
+
+      {/* Wave divider: hero (zinc-900) → bg-secondary */}
+      <div className="relative overflow-hidden -mt-1" style={{ background: 'var(--bg-secondary)' }}>
+        <svg viewBox="0 0 1440 56" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" className="w-full h-10 sm:h-14 block" style={{ fill: '#18181b' }}>
+          <path d="M0,28 C360,56 1080,0 1440,28 L1440,0 L0,0 Z" />
+        </svg>
+      </div>
+
+      {/* How it works */}
+      <HowItWorks />
+
+      {/* Closed store alert */}
+      <ClosedStoreBanner />
 
       {/* Products Section */}
       <main id="products" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
@@ -225,6 +241,7 @@ export default function HomeClient() {
         onClose={handleClosePastelModal}
         acompanhamentos={acompanhamentos}
       />
+      <WhatsAppButton />
     </div>
   );
 }
