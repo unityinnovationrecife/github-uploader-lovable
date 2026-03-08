@@ -40,6 +40,7 @@ export default function AdminLayout() {
     { to: '/admin/pedidos', icon: ShoppingBag, label: 'Pedidos' },
     { to: '/admin/acompanhamentos', icon: UtensilsCrossed, label: 'Acompanhamentos' },
     { to: '/admin/relatorios', icon: BarChart2, label: 'Relatórios' },
+    { to: '/admin/configuracoes', icon: Settings, label: 'Configurações' },
   ];
 
   return (
