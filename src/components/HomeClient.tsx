@@ -219,6 +219,7 @@ export default function HomeClient() {
         )}
       </main>
 
+      <HowItWorks />
       <Footer />
 
       {/* Overlays */}
