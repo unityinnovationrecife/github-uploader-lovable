@@ -10,12 +10,12 @@ type Order = {
 };
 
 const STATUS_LABELS: Record<string, { label: string; color: string; bgColor: string; pulse: boolean }> = {
-  pending:    { label: 'Aguardando',     color: '#f59e0b', bgColor: 'rgba(245,158,11,0.15)',  pulse: true  },
-  confirmed:  { label: 'Confirmado',     color: '#3b82f6', bgColor: 'rgba(59,130,246,0.15)',  pulse: false },
-  preparing:  { label: 'Preparando',     color: '#a855f7', bgColor: 'rgba(168,85,247,0.15)',  pulse: true  },
-  out_for_delivery: { label: 'Saiu p/ entrega', color: '#f97316', bgColor: 'rgba(249,115,22,0.15)', pulse: true },
-  delivered:  { label: 'Entregue ✓',    color: '#22c55e', bgColor: 'rgba(34,197,94,0.15)',   pulse: false },
-  cancelled:  { label: 'Cancelado',      color: '#ef4444', bgColor: 'rgba(239,68,68,0.15)',   pulse: false },
+  pending:          { label: 'Aguardando',      color: '#f59e0b', bgColor: 'rgba(245,158,11,0.15)',  pulse: true  },
+  confirmed:        { label: 'Confirmado',      color: '#3b82f6', bgColor: 'rgba(59,130,246,0.15)',  pulse: false },
+  preparing:        { label: 'Preparando',      color: '#a855f7', bgColor: 'rgba(168,85,247,0.15)',  pulse: true  },
+  out_for_delivery: { label: 'Saiu p/ entrega', color: '#f97316', bgColor: 'rgba(249,115,22,0.15)', pulse: true  },
+  delivered:        { label: 'Entregue ✓',     color: '#22c55e', bgColor: 'rgba(34,197,94,0.15)',   pulse: false },
+  cancelled:        { label: 'Cancelado',       color: '#ef4444', bgColor: 'rgba(239,68,68,0.15)',   pulse: false },
 };
 
 const ACTIVE_STATUSES = ['pending', 'confirmed', 'preparing', 'out_for_delivery'];
@@ -38,45 +38,63 @@ function Clock() {
   );
 }
 
-/** Plays a friendly "ding-dong" alert using Web Audio API */
+/**
+ * Plays a 3-note "ding ding dong" chime using Web Audio API.
+ * Warm sine tones — pleasant for a restaurant TV display.
+ */
 function playNewOrderSound(ctx: AudioContext) {
   const now = ctx.currentTime;
 
-  const playNote = (freq: number, startTime: number, duration: number, gainVal: number) => {
-    const osc = ctx.createOscillator();
+  const playNote = (
+    freq: number,
+    startTime: number,
+    duration: number,
+    gainVal: number,
+  ) => {
+    const osc  = ctx.createOscillator();
     const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
+    // Slight detuning for warmth
+    const osc2  = ctx.createOscillator();
+    const gain2 = ctx.createGain();
 
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(freq, startTime);
+    osc.type  = 'sine';
+    osc2.type = 'sine';
+    osc.frequency.setValueAtTime(freq,        startTime);
+    osc2.frequency.setValueAtTime(freq * 1.002, startTime); // tiny chorus
 
     gain.gain.setValueAtTime(0, startTime);
-    gain.gain.linearRampToValueAtTime(gainVal, startTime + 0.02);
+    gain.gain.linearRampToValueAtTime(gainVal, startTime + 0.015);
     gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
 
-    osc.start(startTime);
-    osc.stop(startTime + duration);
+    gain2.gain.setValueAtTime(0, startTime);
+    gain2.gain.linearRampToValueAtTime(gainVal * 0.4, startTime + 0.015);
+    gain2.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+    osc.connect(gain);   gain.connect(ctx.destination);
+    osc2.connect(gain2); gain2.connect(ctx.destination);
+
+    osc.start(startTime);  osc.stop(startTime + duration);
+    osc2.start(startTime); osc2.stop(startTime + duration);
   };
 
-  // Ding-dong: two pleasant tones
-  playNote(880, now,        0.5, 0.4);  // A5
-  playNote(660, now + 0.22, 0.6, 0.35); // E5
+  // ding ding dong  (E5 → G5 → C5)
+  playNote(659.25, now,        0.55, 0.38);
+  playNote(783.99, now + 0.28, 0.55, 0.34);
+  playNote(523.25, now + 0.56, 0.90, 0.42);
 }
 
 export default function TVFila() {
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders]               = useState<Order[]>([]);
   const [recentDelivered, setRecentDelivered] = useState<Order[]>([]);
-  const [lastUpdate, setLastUpdate] = useState(new Date());
-  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [lastUpdate, setLastUpdate]       = useState(new Date());
+  const [soundEnabled, setSoundEnabled]   = useState(true);
   const [newOrderFlash, setNewOrderFlash] = useState(false);
+  // Set of order IDs currently animating as "new"
+  const [animatingIds, setAnimatingIds]   = useState<Set<string>>(new Set());
 
-  // AudioContext — created on first user interaction to comply with browser autoplay policy
-  const audioCtxRef = useRef<AudioContext | null>(null);
-  // Track known order IDs to detect genuinely new ones
-  const knownIdsRef = useRef<Set<string>>(new Set());
-  // Whether first load is done (don't alert on initial fetch)
-  const initialLoadDoneRef = useRef(false);
+  const audioCtxRef         = useRef<AudioContext | null>(null);
+  const knownIdsRef         = useRef<Set<string>>(new Set());
+  const initialLoadDoneRef  = useRef(false);
 
   const getAudioCtx = useCallback(() => {
     if (!audioCtxRef.current) {
@@ -85,18 +103,35 @@ export default function TVFila() {
     return audioCtxRef.current;
   }, []);
 
-  const triggerAlert = useCallback(() => {
-    if (!soundEnabled) return;
-    try {
-      const ctx = getAudioCtx();
-      if (ctx.state === 'suspended') ctx.resume();
-      playNewOrderSound(ctx);
-    } catch (e) {
-      console.warn('Audio error:', e);
+  const triggerAlert = useCallback((newIds: string[]) => {
+    // Sound
+    if (soundEnabled) {
+      try {
+        const ctx = getAudioCtx();
+        if (ctx.state === 'suspended') ctx.resume();
+        playNewOrderSound(ctx);
+      } catch (e) {
+        console.warn('Audio error:', e);
+      }
     }
-    // Flash screen briefly
+
+    // Screen flash
     setNewOrderFlash(true);
-    setTimeout(() => setNewOrderFlash(false), 800);
+    setTimeout(() => setNewOrderFlash(false), 900);
+
+    // Mark cards as "new" for entrance animation — clear after 3 s
+    setAnimatingIds(prev => {
+      const next = new Set(prev);
+      newIds.forEach(id => next.add(id));
+      return next;
+    });
+    setTimeout(() => {
+      setAnimatingIds(prev => {
+        const next = new Set(prev);
+        newIds.forEach(id => next.delete(id));
+        return next;
+      });
+    }, 3000);
   }, [soundEnabled, getAudioCtx]);
 
   const fetchOrders = useCallback(async () => {
@@ -111,16 +146,20 @@ export default function TVFila() {
       const active = data
         .filter(o => ACTIVE_STATUSES.includes(o.status))
         .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-      const delivered = data.filter(o => o.status === 'delivered').slice(-6).reverse();
 
-      // Detect new orders (only after initial load)
+      const delivered = data
+        .filter(o => o.status === 'delivered')
+        .slice(-6)
+        .reverse();
+
+      // Detect brand-new pending orders
       if (initialLoadDoneRef.current) {
-        const incomingPending = data.filter(o => o.status === 'pending');
-        const hasNew = incomingPending.some(o => !knownIdsRef.current.has(o.id));
-        if (hasNew) triggerAlert();
+        const freshIds = data
+          .filter(o => o.status === 'pending' && !knownIdsRef.current.has(o.id))
+          .map(o => o.id);
+        if (freshIds.length > 0) triggerAlert(freshIds);
       }
 
-      // Update known IDs set
       data.forEach(o => knownIdsRef.current.add(o.id));
       initialLoadDoneRef.current = true;
 
@@ -132,23 +171,18 @@ export default function TVFila() {
 
   useEffect(() => {
     fetchOrders();
-
     const channel = supabase
       .channel('tv-fila-orders')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
         fetchOrders();
       })
       .subscribe();
-
     return () => { supabase.removeChannel(channel); };
   }, [fetchOrders]);
 
-  // Unlock AudioContext on first click anywhere on the page
+  // Unlock AudioContext on first interaction
   useEffect(() => {
-    const unlock = () => {
-      getAudioCtx();
-      window.removeEventListener('click', unlock);
-    };
+    const unlock = () => { getAudioCtx(); window.removeEventListener('click', unlock); };
     window.addEventListener('click', unlock);
     return () => window.removeEventListener('click', unlock);
   }, [getAudioCtx]);
@@ -166,31 +200,26 @@ export default function TVFila() {
         color: '#ffffff',
         display: 'flex',
         flexDirection: 'column',
-        transition: 'background 0.3s ease',
+        transition: 'background 0.4s ease',
       }}
     >
-      {/* New order flash overlay */}
+      {/* Flash border overlay */}
       {newOrderFlash && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 50, pointerEvents: 'none',
-          border: '6px solid #f59e0b',
-          borderRadius: 0,
-          animation: 'tv-flash 0.8s ease-out forwards',
+          border: '5px solid #f59e0b',
+          animation: 'tv-flash 0.9s ease-out forwards',
         }} />
       )}
 
       {/* Header */}
-      <header
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '20px 40px',
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
-          background: 'rgba(0,0,0,0.4)',
-          backdropFilter: 'blur(10px)',
-        }}
-      >
+      <header style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '20px 40px',
+        borderBottom: '1px solid rgba(255,255,255,0.08)',
+        background: 'rgba(0,0,0,0.4)',
+        backdropFilter: 'blur(10px)',
+      }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
           <img src={logo} alt="Logo" style={{ height: 56, objectFit: 'contain' }} />
           <div>
@@ -202,7 +231,6 @@ export default function TVFila() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-          {/* Sound toggle button */}
           <button
             onClick={() => setSoundEnabled(v => !v)}
             title={soundEnabled ? 'Silenciar alertas' : 'Ativar alertas sonoros'}
@@ -212,8 +240,7 @@ export default function TVFila() {
               background: soundEnabled ? 'rgba(249,115,22,0.15)' : 'rgba(255,255,255,0.06)',
               border: `1px solid ${soundEnabled ? 'rgba(249,115,22,0.5)' : 'rgba(255,255,255,0.12)'}`,
               color: soundEnabled ? '#f97316' : '#71717a',
-              fontSize: 13, fontWeight: 600,
-              transition: 'all 0.2s ease',
+              fontSize: 13, fontWeight: 600, transition: 'all 0.2s ease',
             }}
           >
             <span style={{ fontSize: 16 }}>{soundEnabled ? '🔔' : '🔕'}</span>
@@ -234,22 +261,19 @@ export default function TVFila() {
       {/* Body */}
       <div style={{ flex: 1, display: 'flex', gap: 0, overflow: 'hidden' }}>
 
-        {/* Active Orders */}
+        {/* Active orders list */}
         <div style={{ flex: 1, padding: '30px 40px', overflow: 'auto' }}>
-          {/* Status legend */}
+
+          {/* Legend */}
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 28 }}>
             {ACTIVE_STATUSES.map(s => {
               const info = getStatusInfo(s);
               return (
-                <div
-                  key={s}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 8,
-                    padding: '6px 14px', borderRadius: 999,
-                    background: info.bgColor,
-                    border: `1px solid ${info.color}40`,
-                  }}
-                >
+                <div key={s} style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  padding: '6px 14px', borderRadius: 999,
+                  background: info.bgColor, border: `1px solid ${info.color}40`,
+                }}>
                   <span style={{ width: 8, height: 8, borderRadius: '50%', background: info.color, display: 'inline-block' }} />
                   <span style={{ fontSize: 12, fontWeight: 600, color: info.color }}>{info.label}</span>
                 </div>
@@ -258,34 +282,35 @@ export default function TVFila() {
           </div>
 
           {orders.length === 0 ? (
-            <div
-              style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center',
-                justifyContent: 'center', height: 300, gap: 16,
-                color: '#3f3f46',
-              }}
-            >
+            <div style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center',
+              justifyContent: 'center', height: 300, gap: 16, color: '#3f3f46',
+            }}>
               <span style={{ fontSize: 64 }}>🍽️</span>
               <p style={{ fontSize: 22, fontWeight: 600 }}>Nenhum pedido em andamento</p>
               <p style={{ fontSize: 14 }}>Os pedidos aparecerão aqui automaticamente</p>
             </div>
           ) : (
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 14,
-              }}
-            >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               {orders.map((order, index) => {
-                const info = getStatusInfo(order.status);
+                const info    = getStatusInfo(order.status);
                 const isFirst = index === 0;
+                const isNew   = animatingIds.has(order.id);
+
                 return (
                   <div
                     key={order.id}
                     style={{
-                      background: isFirst ? 'rgba(249,115,22,0.07)' : 'rgba(255,255,255,0.04)',
-                      border: `2px solid ${isFirst ? '#f97316' : info.color}${isFirst ? '80' : '40'}`,
+                      background: isNew
+                        ? 'rgba(245,158,11,0.12)'
+                        : isFirst
+                          ? 'rgba(249,115,22,0.07)'
+                          : 'rgba(255,255,255,0.04)',
+                      border: `2px solid ${
+                        isNew   ? '#f59e0b' :
+                        isFirst ? '#f97316' :
+                        info.color
+                      }${isNew ? 'cc' : isFirst ? '80' : '40'}`,
                       borderRadius: 18,
                       padding: '20px 24px',
                       position: 'relative',
@@ -293,14 +318,33 @@ export default function TVFila() {
                       display: 'flex',
                       alignItems: 'center',
                       gap: 20,
-                      transition: 'all 0.3s ease',
+                      transition: 'border-color 0.6s ease, background 0.6s ease, box-shadow 0.6s ease',
+                      boxShadow: isNew
+                        ? '0 0 28px rgba(245,158,11,0.35), 0 0 60px rgba(245,158,11,0.12)'
+                        : 'none',
+                      animation: isNew ? 'tv-slide-in 0.5s cubic-bezier(0.16,1,0.3,1) both' : undefined,
                     }}
                   >
-                    {/* Glow left */}
+                    {/* Glow left bar */}
                     <div style={{
                       position: 'absolute', top: 0, left: 0, bottom: 0, width: 3,
-                      background: `linear-gradient(180deg, transparent, ${info.color}, transparent)`,
+                      background: `linear-gradient(180deg, transparent, ${isNew ? '#f59e0b' : info.color}, transparent)`,
+                      transition: 'background 0.6s ease',
                     }} />
+
+                    {/* "NOVO" badge for incoming orders */}
+                    {isNew && (
+                      <div style={{
+                        position: 'absolute', top: 10, right: 14,
+                        fontSize: 10, fontWeight: 800, letterSpacing: '0.12em',
+                        color: '#f59e0b', background: 'rgba(245,158,11,0.18)',
+                        border: '1px solid rgba(245,158,11,0.5)',
+                        padding: '2px 8px', borderRadius: 999,
+                        animation: 'tv-pulse 1s ease-in-out infinite',
+                      }}>
+                        ✦ NOVO
+                      </div>
+                    )}
 
                     {/* Position badge */}
                     <div style={{
@@ -316,10 +360,13 @@ export default function TVFila() {
                     {/* Info */}
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-                        <span style={{ fontSize: 22, fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        <span style={{
+                          fontSize: 22, fontWeight: 800,
+                          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                        }}>
                           {order.customer_name}
                         </span>
-                        {isFirst && (
+                        {isFirst && !isNew && (
                           <span style={{
                             fontSize: 11, fontWeight: 700, color: '#f97316',
                             background: 'rgba(249,115,22,0.15)', border: '1px solid rgba(249,115,22,0.4)',
@@ -361,15 +408,13 @@ export default function TVFila() {
 
         {/* Delivered sidebar */}
         {recentDelivered.length > 0 && (
-          <div
-            style={{
-              width: 280,
-              borderLeft: '1px solid rgba(255,255,255,0.06)',
-              background: 'rgba(0,0,0,0.3)',
-              padding: '30px 24px',
-              overflow: 'auto',
-            }}
-          >
+          <div style={{
+            width: 280,
+            borderLeft: '1px solid rgba(255,255,255,0.06)',
+            background: 'rgba(0,0,0,0.3)',
+            padding: '30px 24px',
+            overflow: 'auto',
+          }}>
             <h2 style={{
               fontSize: 13, fontWeight: 700, color: '#52525b',
               letterSpacing: '0.12em', textTransform: 'uppercase',
@@ -377,18 +422,13 @@ export default function TVFila() {
             }}>
               ✅ Entregues
             </h2>
-
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {recentDelivered.map(order => (
-                <div
-                  key={order.id}
-                  style={{
-                    background: 'rgba(34,197,94,0.06)',
-                    border: '1px solid rgba(34,197,94,0.2)',
-                    borderRadius: 14,
-                    padding: '14px 18px',
-                  }}
-                >
+                <div key={order.id} style={{
+                  background: 'rgba(34,197,94,0.06)',
+                  border: '1px solid rgba(34,197,94,0.2)',
+                  borderRadius: 14, padding: '14px 18px',
+                }}>
                   <div style={{ fontSize: 11, color: '#52525b', marginBottom: 4 }}>
                     #{shortId(order.id)}
                   </div>
@@ -405,16 +445,20 @@ export default function TVFila() {
         )}
       </div>
 
-      {/* Animations */}
       <style>{`
         @keyframes tv-pulse {
           0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.4; transform: scale(0.8); }
+          50%       { opacity: 0.4; transform: scale(0.8); }
         }
         @keyframes tv-flash {
           0%   { opacity: 1; }
-          50%  { opacity: 0.6; }
+          60%  { opacity: 0.7; }
           100% { opacity: 0; }
+        }
+        @keyframes tv-slide-in {
+          0%   { opacity: 0; transform: translateY(-22px) scale(0.97); }
+          60%  { opacity: 1; transform: translateY(4px) scale(1.01); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
         }
       `}</style>
     </div>
