@@ -3,6 +3,7 @@ import { useCartStore } from '@/store/cart-store';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import logo from '@/assets/logo.png';
+import { useStoreHours, getStoreStatusFromHours } from '@/hooks/use-store-settings';
 
 function getStoreStatus() {
   const now = new Date();
