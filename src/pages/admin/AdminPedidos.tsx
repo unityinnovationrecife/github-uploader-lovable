@@ -61,9 +61,9 @@ export default function AdminPedidos() {
 
   // Atualiza o título da aba com o contador de pedidos pendentes
   useEffect(() => {
-    if (loading) return;
     const base = 'Pedidos | Admin';
-    document.title = pendingCount > 0 ? `(${pendingCount}) ${base}` : base;
+    const title = !loading && pendingCount > 0 ? `(${pendingCount}) ${base}` : base;
+    document.title = title;
     return () => { document.title = 'G&S Salgados'; };
   }, [pendingCount, loading]);
 
