@@ -123,6 +123,7 @@ export type Database = {
           delivery_zone: string
           delivery_zone_name: string
           id: string
+          notes: string | null
           payment_method: string
           status: string
           subtotal: number
@@ -138,6 +139,7 @@ export type Database = {
           delivery_zone: string
           delivery_zone_name: string
           id?: string
+          notes?: string | null
           payment_method: string
           status?: string
           subtotal: number
@@ -153,6 +155,7 @@ export type Database = {
           delivery_zone?: string
           delivery_zone_name?: string
           id?: string
+          notes?: string | null
           payment_method?: string
           status?: string
           subtotal?: number
