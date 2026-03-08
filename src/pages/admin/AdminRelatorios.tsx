@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, TrendingUp, ShoppingBag, DollarSign, Package, Download, FileText, FileSpreadsheet } from 'lucide-react';
+import { Loader2, TrendingUp, ShoppingBag, DollarSign, Package, Download, FileText, FileSpreadsheet, Tag } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   LineChart, Line, Legend,
