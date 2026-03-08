@@ -418,6 +418,14 @@ export default function AdminPedidos() {
                         </div>
                       </div>
 
+                      {/* Observações */}
+                      {order.notes && (
+                        <div className="bg-orange-500/5 border border-orange-500/20 rounded-xl p-3">
+                          <p className="text-xs font-semibold text-orange-500/80 uppercase mb-1">📝 Observações</p>
+                          <p className="text-sm text-foreground leading-relaxed">{order.notes}</p>
+                        </div>
+                      )}
+
                       {/* Itens */}
                       <div>
                         <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">Itens</p>
