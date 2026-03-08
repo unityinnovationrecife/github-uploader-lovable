@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, ArrowLeft } from 'lucide-react';
 import logo from '@/assets/logo.png';
 
 type OrderItem = {
@@ -271,6 +271,24 @@ export default function TVFila() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          {/* Back to admin */}
+          <a
+            href="/admin"
+            title="Voltar ao admin"
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              padding: '8px 14px', borderRadius: 999, cursor: 'pointer',
+              textDecoration: 'none',
+              background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+              border: `1px solid ${t.border}`,
+              color: t.textMuted,
+              fontSize: 13, fontWeight: 600, transition: 'all 0.2s ease',
+            }}
+          >
+            <ArrowLeft size={15} />
+            <span>Admin</span>
+          </a>
+
           {/* Dark/Light toggle */}
           <button
             onClick={() => setDark(v => !v)}
