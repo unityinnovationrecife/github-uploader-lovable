@@ -96,6 +96,7 @@ export default function TVFila() {
   const [lastUpdate, setLastUpdate]       = useState(new Date());
   const [soundEnabled, setSoundEnabled]   = useState(true);
   const [newOrderFlash, setNewOrderFlash] = useState(false);
+  const [dark, setDark]                   = useState(false);
   // Set of order IDs currently animating as "new"
   const [animatingIds, setAnimatingIds]   = useState<Set<string>>(new Set());
 
