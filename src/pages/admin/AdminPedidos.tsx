@@ -185,15 +185,7 @@ export default function AdminPedidos() {
   const fmt = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   const fmtDate = (d: string) => new Date(d).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
 
-  // Filtro aplicado
-  const visibleOrders = orders.filter((o) => {
-    if (o.archived !== showArchived) return false;
-    if (statusFilter !== 'all' && o.status !== statusFilter) return false;
-    if (search && !o.customer_name.toLowerCase().includes(search.toLowerCase())) return false;
-    return true;
-  });
-
-  const archivedCount = orders.filter(o => o.archived).length;
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -202,12 +194,13 @@ export default function AdminPedidos() {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Pedidos</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            {visibleOrders.length} {showArchived ? 'arquivados' : 'pedido' + (visibleOrders.length !== 1 ? 's' : '')}
+            {totalCount} {showArchived ? 'arquivados' : 'pedido' + (totalCount !== 1 ? 's' : '')}
+            {totalPages > 1 && ` · pág. ${page + 1} de ${totalPages}`}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setShowArchived(!showArchived)}
+            onClick={() => { setPage(0); setShowArchived(!showArchived); setStatusFilter('all'); setSearch(''); setSearchInput(''); }}
             className={`inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border transition-all ${
               showArchived
                 ? 'bg-muted text-foreground border-border'
@@ -215,7 +208,7 @@ export default function AdminPedidos() {
             }`}
           >
             {showArchived ? <ArchiveRestore className="w-3.5 h-3.5" /> : <Archive className="w-3.5 h-3.5" />}
-            {showArchived ? 'Ver ativos' : `Arquivados${archivedCount > 0 ? ` (${archivedCount})` : ''}`}
+            {showArchived ? 'Ver ativos' : 'Arquivados'}
           </button>
           {!showArchived && (
             <span className="inline-flex items-center gap-1.5 text-xs font-medium bg-primary/10 text-primary border border-primary/20 px-3 py-1.5 rounded-full">
@@ -228,14 +221,16 @@ export default function AdminPedidos() {
 
       {/* Filtros */}
       <div className="flex-shrink-0 px-6 py-3 border-b border-border bg-background/80 flex flex-col sm:flex-row gap-2">
-        {/* Busca por nome */}
+        {/* Busca por nome com debounce manual */}
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por nome..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && applySearch(searchInput)}
+            onBlur={() => applySearch(searchInput)}
+            placeholder="Buscar por nome... (Enter)"
             className="w-full pl-9 pr-4 py-2 text-sm rounded-xl bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/25 transition-all"
           />
         </div>
@@ -244,7 +239,7 @@ export default function AdminPedidos() {
           <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(e) => applyFilter(e.target.value, showArchived)}
             className="pl-9 pr-8 py-2 text-sm rounded-xl bg-muted/50 border border-border text-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/25 transition-all appearance-none cursor-pointer"
           >
             <option value="all">Todos os status</option>
