@@ -80,6 +80,15 @@ export default function ProductCard({ product, onSelectFlavors }: ProductCardPro
         </div>
       )}
 
+      {/* Featured badge */}
+      {product.featured && isAvailable && !isCombo && (
+        <div className="absolute top-3 right-3 z-10">
+          <span className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 text-[10px] font-bold text-white uppercase tracking-wider shadow-lg shadow-yellow-500/30">
+            🔥 Mais pedido
+          </span>
+        </div>
+      )}
+
       {/* Image area */}
       <div
         className={`relative aspect-[4/3] overflow-hidden ${

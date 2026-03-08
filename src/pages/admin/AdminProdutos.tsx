@@ -18,6 +18,7 @@ type Product = {
   has_acomp: boolean;
   display_order: number;
   visible: boolean;
+  featured: boolean;
 };
 
 const CATEGORIES = ['Coxinhas', 'Salgados', 'Porções', 'Pastel', 'Bebidas'];
@@ -36,6 +37,7 @@ const emptyForm = (): Omit<Product, 'id'> => ({
   has_acomp: false,
   display_order: 0,
   visible: true,
+  featured: false,
 });
 
 export default function AdminProdutos() {
@@ -205,8 +207,9 @@ export default function AdminProdutos() {
                   <thead>
                     <tr className="border-b border-border bg-muted/20">
                       <th className="text-left px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase">Produto</th>
-                      <th className="text-left px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase">Preço</th>
+                       <th className="text-left px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase">Preço</th>
                       <th className="text-center px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase hidden sm:table-cell">Disponível</th>
+                      <th className="text-center px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase hidden sm:table-cell">Destaque</th>
                       <th className="px-4 py-2.5" />
                     </tr>
                   </thead>
@@ -261,6 +264,31 @@ export default function AdminProdutos() {
                             </button>
                             <span className={`text-[10px] font-semibold ${p.visible ? 'text-green-600' : 'text-red-500'}`}>
                               {p.visible ? 'Disponível' : 'Esgotado'}
+                            </span>
+                          </div>
+                        </td>
+                        {/* Toggle Destaque */}
+                        <td className="px-4 py-3 hidden sm:table-cell text-center">
+                          <div className="flex flex-col items-center gap-1">
+                            <button
+                              onClick={async () => {
+                                const next = !p.featured;
+                                await supabase.from('products').update({ featured: next }).eq('id', p.id);
+                                setProducts(prev => prev.map(x => x.id === p.id ? { ...x, featured: next } : x));
+                              }}
+                              title={p.featured ? 'Remover destaque' : 'Marcar como destaque'}
+                              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                                p.featured ? 'bg-yellow-400' : 'bg-muted-foreground/30'
+                              }`}
+                            >
+                              <span
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-md transition-transform duration-200 ${
+                                  p.featured ? 'translate-x-6' : 'translate-x-1'
+                                }`}
+                              />
+                            </button>
+                            <span className={`text-[10px] font-semibold ${p.featured ? 'text-yellow-600' : 'text-muted-foreground'}`}>
+                              {p.featured ? '🔥 Destaque' : 'Normal'}
                             </span>
                           </div>
                         </td>
@@ -411,6 +439,15 @@ export default function AdminProdutos() {
                     className="rounded accent-primary"
                   />
                   <span className="text-sm font-medium text-foreground">Aceita acompanhamentos?</span>
+                </label>
+
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox" checked={form.featured}
+                    onChange={e => setForm({ ...form, featured: e.target.checked })}
+                    className="rounded accent-primary"
+                  />
+                  <span className="text-sm font-medium text-foreground">🔥 Produto em destaque? <span className="text-xs text-muted-foreground font-normal">(exibe badge "Mais pedido")</span></span>
                 </label>
 
                 <label className="flex items-center gap-2 cursor-pointer">

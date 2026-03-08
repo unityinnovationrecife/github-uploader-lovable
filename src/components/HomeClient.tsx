@@ -50,6 +50,7 @@ export default function HomeClient() {
           availableFlavors: p.available_flavors || undefined,
           allowDuplicateFlavors: p.allow_duplicate_flavors || false,
           available: p.visible !== false,
+          featured: p.featured || false,
         }));
 
         setProducts(mapped);
@@ -116,31 +117,32 @@ export default function HomeClient() {
           </p>
         </div>
 
-        {/* Search Bar */}
-        <div className="mb-4">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar produto... ex: coxinha, pastel, batata"
-              className="w-full pl-11 pr-10 py-3 rounded-2xl bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-primary)] placeholder-[var(--text-muted)] text-sm focus:outline-none focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/15 transition-all"
-            />
-            {isSearching && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-primary)] transition-all"
-                aria-label="Limpar busca"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
+        {/* Search + Category Filter — sticky */}
+        <div className="sticky top-[64px] z-30 bg-[var(--bg-primary)] pt-2 pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 border-b border-[var(--border-color)] mb-6 shadow-sm">
+          {/* Search Bar */}
+          <div className="mb-3">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Buscar produto... ex: coxinha, pastel, batata"
+                className="w-full pl-11 pr-10 py-3 rounded-2xl bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-primary)] placeholder-[var(--text-muted)] text-sm focus:outline-none focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/15 transition-all"
+              />
+              {isSearching && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-primary)] transition-all"
+                  aria-label="Limpar busca"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Category Filter */}
-        <div className="mb-8">
+          {/* Category Filter */}
           <CategoryFilter
             selectedCategory={selectedCategory}
             onSelectCategory={handleCategorySelect}
