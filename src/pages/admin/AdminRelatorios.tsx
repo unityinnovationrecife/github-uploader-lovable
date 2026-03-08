@@ -114,6 +114,28 @@ function exportProductsCSV(products: ProductStat[], period: number) {
   downloadBlob(blob, `produtos-mais-vendidos-${period}dias.csv`);
 }
 
+function exportCouponsCSV(coupons: CouponStat[]) {
+  const headers = ['Código', 'Tipo', 'Valor', 'Usos', 'Desconto Total Estimado', 'Ativo', 'Validade'];
+  const rows = coupons.map(c => {
+    const isExpired = c.expires_at ? new Date(c.expires_at) < new Date() : false;
+    const totalDiscount = c.type === 'fixed'
+      ? (c.value * c.uses_count).toFixed(2).replace('.', ',')
+      : `${c.value}% x ${c.uses_count} uso${c.uses_count !== 1 ? 's' : ''}`;
+    return [
+      c.code,
+      c.type === 'percent' ? 'Percentual' : 'Fixo',
+      c.type === 'percent' ? `${c.value}%` : c.value.toFixed(2).replace('.', ','),
+      c.uses_count,
+      totalDiscount,
+      c.active && !isExpired ? 'Sim' : 'Nao',
+      c.expires_at ? new Date(c.expires_at).toLocaleDateString('pt-BR') : 'Sem validade',
+    ];
+  });
+  const csv = [headers, ...rows].map(r => r.map(escapeCsv).join(';')).join('\n');
+  const blobCoupons = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  downloadBlob(blobCoupons, 'cupons.csv');
+}
+
 async function exportOrdersPDF(orders: FullOrder[], period: number, stats: { totalOrders: number; totalRevenue: number; avgTicket: number }) {
   const fmt = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   const now = new Date().toLocaleDateString('pt-BR');
@@ -269,11 +291,12 @@ export default function AdminRelatorios() {
 
   const fmt = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-  const handleExport = async (type: 'csv-orders' | 'csv-products' | 'pdf') => {
+  const handleExport = async (type: 'csv-orders' | 'csv-products' | 'csv-coupons' | 'pdf') => {
     setExporting(true);
     try {
       if (type === 'csv-orders') exportOrdersCSV(allOrders, period);
       else if (type === 'csv-products') exportProductsCSV(topProducts, period);
+      else if (type === 'csv-coupons') exportCouponsCSV(couponStats);
       else if (type === 'pdf') await exportOrdersPDF(allOrders, period, stats);
     } finally {
       setExporting(false);
@@ -329,6 +352,10 @@ export default function AdminRelatorios() {
                 <DropdownMenuItem onClick={() => handleExport('csv-products')} className="gap-2 cursor-pointer" disabled={topProducts.length === 0}>
                   <FileSpreadsheet className="w-4 h-4 text-green-600" />
                   CSV – Produtos vendidos
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleExport('csv-coupons')} className="gap-2 cursor-pointer" disabled={couponStats.length === 0}>
+                  <FileSpreadsheet className="w-4 h-4 text-green-600" />
+                  CSV – Cupons de desconto
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleExport('pdf')} className="gap-2 cursor-pointer">
                   <FileText className="w-4 h-4 text-red-500" />
