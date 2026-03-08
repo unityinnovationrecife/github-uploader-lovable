@@ -1,4 +1,4 @@
-import { X, Send, MapPin, User, CreditCard, Home, ChevronRight, ShoppingBag, ArrowLeft, Trash2, Banknote, QrCode } from 'lucide-react';
+import { X, Send, MapPin, User, CreditCard, Home, ChevronRight, ShoppingBag, ArrowLeft, Trash2, Banknote, QrCode, Phone } from 'lucide-react';
 import { useCartStore } from '@/store/cart-store';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -12,6 +12,7 @@ export default function CheckoutModal() {
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>(1);
   const [nome, setNome] = useState('');
+  const [telefone, setTelefone] = useState('');
   const [rua, setRua] = useState('');
   const [numero, setNumero] = useState('');
   const [referencia, setReferencia] = useState('');
