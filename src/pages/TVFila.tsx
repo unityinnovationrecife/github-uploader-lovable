@@ -157,13 +157,26 @@ export default function TVFila() {
     <div
       style={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #0a0a0f 0%, #18181b 50%, #0f0f14 100%)',
+        background: newOrderFlash
+          ? 'linear-gradient(135deg, #1a1200 0%, #2a1a00 50%, #1a1200 100%)'
+          : 'linear-gradient(135deg, #0a0a0f 0%, #18181b 50%, #0f0f14 100%)',
         fontFamily: "'Poppins', Arial, sans-serif",
         color: '#ffffff',
         display: 'flex',
         flexDirection: 'column',
+        transition: 'background 0.3s ease',
       }}
     >
+      {/* New order flash overlay */}
+      {newOrderFlash && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 50, pointerEvents: 'none',
+          border: '6px solid #f59e0b',
+          borderRadius: 0,
+          animation: 'tv-flash 0.8s ease-out forwards',
+        }} />
+      )}
+
       {/* Header */}
       <header
         style={{
@@ -186,12 +199,32 @@ export default function TVFila() {
           </div>
         </div>
 
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 36, fontWeight: 700, fontVariantNumeric: 'tabular-nums', color: '#f97316' }}>
-            <Clock />
-          </div>
-          <div style={{ fontSize: 12, color: '#71717a' }}>
-            Últ. atualiz: {lastUpdate.toLocaleTimeString('pt-BR')}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+          {/* Sound toggle button */}
+          <button
+            onClick={() => setSoundEnabled(v => !v)}
+            title={soundEnabled ? 'Silenciar alertas' : 'Ativar alertas sonoros'}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: '8px 16px', borderRadius: 999, cursor: 'pointer',
+              background: soundEnabled ? 'rgba(249,115,22,0.15)' : 'rgba(255,255,255,0.06)',
+              border: `1px solid ${soundEnabled ? 'rgba(249,115,22,0.5)' : 'rgba(255,255,255,0.12)'}`,
+              color: soundEnabled ? '#f97316' : '#71717a',
+              fontSize: 13, fontWeight: 600,
+              transition: 'all 0.2s ease',
+            }}
+          >
+            <span style={{ fontSize: 16 }}>{soundEnabled ? '🔔' : '🔕'}</span>
+            <span>{soundEnabled ? 'Som ativo' : 'Sem som'}</span>
+          </button>
+
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: 36, fontWeight: 700, fontVariantNumeric: 'tabular-nums', color: '#f97316' }}>
+              <Clock />
+            </div>
+            <div style={{ fontSize: 12, color: '#71717a' }}>
+              Últ. atualiz: {lastUpdate.toLocaleTimeString('pt-BR')}
+            </div>
           </div>
         </div>
       </header>
