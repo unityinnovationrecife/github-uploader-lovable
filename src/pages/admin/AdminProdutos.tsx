@@ -37,6 +37,7 @@ const emptyForm = (): Omit<Product, 'id'> => ({
   has_acomp: false,
   display_order: 0,
   visible: true,
+  featured: false,
 });
 
 export default function AdminProdutos() {
