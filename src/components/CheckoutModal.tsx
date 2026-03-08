@@ -169,6 +169,14 @@ export default function CheckoutModal() {
           selected_acomp: item.selectedAcomp || [],
         }));
         await supabase.from('order_items').insert(orderItems);
+
+        // Increment coupon uses_count
+        if (appliedCoupon) {
+          await supabase
+            .from('coupons' as any)
+            .update({ uses_count: (appliedCoupon as any).uses_count_raw + 1 } as any)
+            .eq('id', appliedCoupon.id);
+        }
       }
     } catch (error) {
       console.error('Erro ao salvar pedido:', error);
