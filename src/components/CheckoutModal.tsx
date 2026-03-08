@@ -85,27 +85,41 @@ export default function CheckoutModal() {
       console.error('Erro ao salvar pedido:', error);
     }
 
+    const now = new Date().toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+    const totalItems = items.reduce((acc, i) => acc + i.quantity, 0);
+
     const lines: string[] = [];
-    lines.push('*=== NOVO PEDIDO - G & S SALGADOS ===*');
+    lines.push('🍢 *NOVO PEDIDO — G&S SALGADOS* 🍢');
+    lines.push(`🕐 ${now}`);
+    lines.push('━━━━━━━━━━━━━━━━━━━━━━━');
     lines.push('');
-    lines.push('*ITENS DO PEDIDO:*');
-    items.forEach((item) => {
-      lines.push(`- ${item.quantity}x ${item.name} - ${formatPrice(item.price * item.quantity)}`);
-      if (item.selectedFlavors?.length) lines.push(`  > Sabores: ${item.selectedFlavors.join(', ')}`);
-      if (item.selectedAcomp?.length) lines.push(`  > Acompanhamentos: ${item.selectedAcomp.join(', ')}`);
+    lines.push(`🛒 *ITENS DO PEDIDO* (${totalItems} ${totalItems === 1 ? 'item' : 'itens'})`);
+    lines.push('');
+    items.forEach((item, idx) => {
+      lines.push(`${idx + 1}. *${item.name}*`);
+      lines.push(`   📦 Qtd: ${item.quantity}x  |  💰 ${formatPrice(item.price * item.quantity)}`);
+      if (item.selectedFlavors?.length) lines.push(`   🍽️ Sabores: ${item.selectedFlavors.join(', ')}`);
+      if (item.selectedAcomp?.length)   lines.push(`   🥗 Acomp: ${item.selectedAcomp.join(', ')}`);
     });
-    lines.push('------------------------------------');
-    lines.push(`*Subtotal:* ${formatPrice(subtotal)}`);
-    lines.push(`*Taxa de Entrega:* ${deliveryFee === 0 ? 'Gratis' : formatPrice(deliveryFee)} (${getZoneName()})`);
-    lines.push(`*VALOR TOTAL: ${formatPrice(finalTotal)}*`);
     lines.push('');
-    lines.push('*DADOS DA ENTREGA:*');
-    lines.push(`*Nome:* ${nome}`);
-    lines.push(`*Bairro:* ${getZoneName()}`);
-    lines.push(`*Endereco:* ${endereco}`);
-    lines.push(`*Pagamento:* ${pagamento}`);
+    lines.push('━━━━━━━━━━━━━━━━━━━━━━━');
+    lines.push(`💵 Subtotal: ${formatPrice(subtotal)}`);
+    if (deliveryFee > 0) {
+      lines.push(`🛵 Entrega (${getZoneName()}): ${formatPrice(deliveryFee)}`);
+    } else {
+      lines.push(`🛵 Entrega (${getZoneName()}): *Grátis* ✅`);
+    }
+    lines.push(`💳 Pagamento: ${pagamento}`);
     lines.push('');
-    lines.push('Agradecemos a preferencia!');
+    lines.push(`✅ *TOTAL: ${formatPrice(finalTotal)}*`);
+    lines.push('━━━━━━━━━━━━━━━━━━━━━━━');
+    lines.push('');
+    lines.push('📍 *DADOS DE ENTREGA*');
+    lines.push(`👤 Cliente: ${nome}`);
+    lines.push(`🏠 Endereço: ${endereco}`);
+    lines.push(`📌 Bairro: ${getZoneName()}`);
+    lines.push('');
+    lines.push('_Pedido gerado automaticamente pelo site_ 🤖');
 
     const message = lines.join('\n');
 
