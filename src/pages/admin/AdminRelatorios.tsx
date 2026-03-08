@@ -1,10 +1,17 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, TrendingUp, ShoppingBag, DollarSign, Package } from 'lucide-react';
+import { Loader2, TrendingUp, ShoppingBag, DollarSign, Package, Download, FileText, FileSpreadsheet } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   LineChart, Line, Legend,
 } from 'recharts';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 type StatCard = { label: string; value: string; icon: React.ElementType; color: string };
 
