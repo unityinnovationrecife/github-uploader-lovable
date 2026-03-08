@@ -50,6 +50,7 @@ export default function HomeClient() {
           availableFlavors: p.available_flavors || undefined,
           allowDuplicateFlavors: p.allow_duplicate_flavors || false,
           available: p.visible !== false,
+          featured: p.featured || false,
         }));
 
         setProducts(mapped);
