@@ -5,7 +5,6 @@ import { useStoreHours, getStoreStatusFromHours, StoreHour } from '@/hooks/use-s
 function getNextOpenTime(hours: StoreHour[]): { label: string; msUntil: number } | null {
   const now = new Date();
   const day = now.getDay();
-  const time = now.getHours() + now.getMinutes() / 60;
   const isWeekend = day === 0 || day === 6;
   const dayType = isWeekend ? 'weekend' : 'weekday';
   const oppType = isWeekend ? 'weekday' : 'weekend';
@@ -13,7 +12,6 @@ function getNextOpenTime(hours: StoreHour[]): { label: string; msUntil: number }
   const todayConfig = hours.find(h => h.day_type === dayType && h.active);
   const otherConfig = hours.find(h => h.day_type === oppType && h.active);
 
-  // Determine opening time candidates
   const candidates: { label: string; date: Date }[] = [];
 
   if (todayConfig) {
@@ -32,26 +30,14 @@ function getNextOpenTime(hours: StoreHour[]): { label: string; msUntil: number }
   }
 
   if (candidates.length === 0) {
-    // Fallback: use static times
     const fallback = new Date();
-    if (isWeekend) {
-      fallback.setHours(17, 0, 0, 0);
-    } else {
-      fallback.setHours(19, 0, 0, 0);
-    }
+    fallback.setHours(isWeekend ? 17 : 19, 0, 0, 0);
     if (fallback > now) {
-      return {
-        label: isWeekend ? 'Sáb e Dom' : 'Seg a Sex',
-        msUntil: fallback.getTime() - now.getTime(),
-      };
+      return { label: isWeekend ? 'Sáb e Dom' : 'Seg a Sex', msUntil: fallback.getTime() - now.getTime() };
     }
-    // try tomorrow
     fallback.setDate(fallback.getDate() + 1);
     fallback.setHours(isWeekend ? 19 : 17, 0, 0, 0);
-    return {
-      label: isWeekend ? 'Seg a Sex' : 'Sáb e Dom',
-      msUntil: fallback.getTime() - now.getTime(),
-    };
+    return { label: isWeekend ? 'Seg a Sex' : 'Sáb e Dom', msUntil: fallback.getTime() - now.getTime() };
   }
 
   const soonest = candidates.reduce((a, b) => a.date < b.date ? a : b);
@@ -72,7 +58,6 @@ export default function ClosedStoreBanner() {
   const { hours } = useStoreHours();
   const [status, setStatus] = useState(getStoreStatusFromHours([]));
   const [countdown, setCountdown] = useState('');
-  const [nextLabel, setNextLabel] = useState('');
 
   useEffect(() => {
     function update() {
@@ -80,10 +65,7 @@ export default function ClosedStoreBanner() {
       setStatus(s);
       if (!s.isOpen) {
         const next = getNextOpenTime(hours);
-        if (next) {
-          setCountdown(formatCountdown(next.msUntil));
-          setNextLabel(next.label);
-        }
+        if (next) setCountdown(formatCountdown(next.msUntil));
       }
     }
     update();
@@ -96,7 +78,7 @@ export default function ClosedStoreBanner() {
   return (
     <div className="w-full bg-[var(--bg-secondary)] border-b border-[var(--border-color)] transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 rounded-2xl bg-red-500/8 border border-red-500/20 px-5 py-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 rounded-2xl bg-red-500/[0.08] border border-red-500/20 px-5 py-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-red-500/15 flex items-center justify-center flex-shrink-0">
               <AlertCircle className="w-5 h-5 text-red-500" />
