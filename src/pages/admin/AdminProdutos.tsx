@@ -207,8 +207,9 @@ export default function AdminProdutos() {
                   <thead>
                     <tr className="border-b border-border bg-muted/20">
                       <th className="text-left px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase">Produto</th>
-                      <th className="text-left px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase">Preço</th>
+                       <th className="text-left px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase">Preço</th>
                       <th className="text-center px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase hidden sm:table-cell">Disponível</th>
+                      <th className="text-center px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase hidden sm:table-cell">Destaque</th>
                       <th className="px-4 py-2.5" />
                     </tr>
                   </thead>
