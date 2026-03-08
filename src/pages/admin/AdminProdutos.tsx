@@ -267,6 +267,31 @@ export default function AdminProdutos() {
                             </span>
                           </div>
                         </td>
+                        {/* Toggle Destaque */}
+                        <td className="px-4 py-3 hidden sm:table-cell text-center">
+                          <div className="flex flex-col items-center gap-1">
+                            <button
+                              onClick={async () => {
+                                const next = !p.featured;
+                                await supabase.from('products').update({ featured: next }).eq('id', p.id);
+                                setProducts(prev => prev.map(x => x.id === p.id ? { ...x, featured: next } : x));
+                              }}
+                              title={p.featured ? 'Remover destaque' : 'Marcar como destaque'}
+                              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                                p.featured ? 'bg-yellow-400' : 'bg-muted-foreground/30'
+                              }`}
+                            >
+                              <span
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-md transition-transform duration-200 ${
+                                  p.featured ? 'translate-x-6' : 'translate-x-1'
+                                }`}
+                              />
+                            </button>
+                            <span className={`text-[10px] font-semibold ${p.featured ? 'text-yellow-600' : 'text-muted-foreground'}`}>
+                              {p.featured ? '🔥 Destaque' : 'Normal'}
+                            </span>
+                          </div>
+                        </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2 justify-end">
                             {/* Toggle mobile (só aparece em telas pequenas) */}
