@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import {
   Loader2, ChevronDown, ChevronUp, ChevronRight,
   Clock, CheckCircle, XCircle, Truck, ChefHat,
-  Archive, ArchiveRestore, Search, Filter, Phone,
+  Archive, ArchiveRestore, Search, Filter, Phone, Printer,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
