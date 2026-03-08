@@ -143,7 +143,7 @@ export default function TVFila() {
   const fetchOrders = useCallback(async () => {
     const { data } = await supabase
       .from('orders')
-      .select('id, customer_name, status, created_at')
+      .select('id, customer_name, status, created_at, order_items(product_name, quantity)')
       .eq('archived', false)
       .in('status', [...ACTIVE_STATUSES, 'delivered'])
       .order('created_at', { ascending: true });
