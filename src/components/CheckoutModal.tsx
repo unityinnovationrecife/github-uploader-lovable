@@ -1,4 +1,4 @@
-import { X, Send, MapPin, User, CreditCard, Home, ChevronRight, ShoppingBag, ArrowLeft, Trash2, Banknote, QrCode, Phone, MessageSquare, Clock, AlertCircle } from 'lucide-react';
+import { X, Send, MapPin, User, CreditCard, Home, ChevronRight, ShoppingBag, ArrowLeft, Trash2, Banknote, QrCode, Phone, MessageSquare, Clock, AlertCircle, Tag, CheckCircle2, Loader2 } from 'lucide-react';
 import { useCartStore } from '@/store/cart-store';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,6 +6,14 @@ import { useNavigate } from 'react-router-dom';
 import { useDeliveryZones, useStoreHours, getStoreStatusFromHours } from '@/hooks/use-store-settings';
 
 type Step = 1 | 2;
+
+type AppliedCoupon = {
+  id: string;
+  code: string;
+  type: 'percent' | 'fixed';
+  value: number;
+  discountAmount: number;
+};
 
 export default function CheckoutModal() {
   const { items, isCheckoutOpen, closeCheckout, getTotalPrice, clearCart, removeItem } = useCartStore();
@@ -25,6 +33,12 @@ export default function CheckoutModal() {
   const [troco, setTroco] = useState('');
   const [mounted, setMounted] = useState(false);
 
+  // Coupon state
+  const [couponInput, setCouponInput] = useState('');
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
+
   const selectedZone = zones.find(z => z.key === zoneKey);
   const isResidence = zoneKey === 'residence';
 
@@ -36,7 +50,7 @@ export default function CheckoutModal() {
 
   // Reset to step 1 when modal opens
   useEffect(() => {
-    if (isCheckoutOpen) setStep(1);
+    if (isCheckoutOpen) { setStep(1); }
   }, [isCheckoutOpen]);
 
   if (!mounted) return null;
@@ -49,7 +63,68 @@ export default function CheckoutModal() {
 
   const deliveryFee = selectedZone?.fee ?? 0;
   const subtotal = getTotalPrice();
-  const finalTotal = subtotal + deliveryFee;
+  const discountAmount = appliedCoupon?.discountAmount ?? 0;
+  const finalTotal = Math.max(0, subtotal - discountAmount) + deliveryFee;
+
+  const validateCoupon = async () => {
+    const code = couponInput.trim().toUpperCase();
+    if (!code) return;
+    setCouponLoading(true);
+    setCouponError('');
+
+    const { data, error } = await supabase
+      .from('coupons' as any)
+      .select('*')
+      .eq('code', code)
+      .eq('active', true)
+      .maybeSingle();
+
+    setCouponLoading(false);
+
+    if (error || !data) {
+      setCouponError('Cupom inválido ou inativo.');
+      return;
+    }
+
+    const coupon = data as any;
+
+    // Check expiry
+    if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
+      setCouponError('Este cupom expirou.');
+      return;
+    }
+
+    // Check max uses
+    if (coupon.max_uses !== null && coupon.uses_count >= coupon.max_uses) {
+      setCouponError('Este cupom atingiu o limite de usos.');
+      return;
+    }
+
+    // Check min order
+    if (coupon.min_order > 0 && subtotal < coupon.min_order) {
+      setCouponError(`Pedido mínimo de ${formatPrice(coupon.min_order)} para este cupom.`);
+      return;
+    }
+
+    const discountAmount = coupon.type === 'percent'
+      ? Math.min(subtotal, (subtotal * coupon.value) / 100)
+      : Math.min(subtotal, coupon.value);
+
+    setAppliedCoupon({
+      id: coupon.id,
+      code: coupon.code,
+      type: coupon.type,
+      value: coupon.value,
+      discountAmount,
+    });
+    setCouponInput('');
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponInput('');
+    setCouponError('');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
