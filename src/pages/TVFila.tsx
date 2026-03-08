@@ -149,24 +149,29 @@ export default function TVFila() {
       .order('created_at', { ascending: true });
 
     if (data) {
-      const active = data
+      const mapped = data.map(o => ({
+        ...o,
+        order_items: Array.isArray(o.order_items) ? o.order_items : [],
+      })) as Order[];
+
+      const active = mapped
         .filter(o => ACTIVE_STATUSES.includes(o.status))
         .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
 
-      const delivered = data
+      const delivered = mapped
         .filter(o => o.status === 'delivered')
         .slice(-6)
         .reverse();
 
       // Detect brand-new pending orders
       if (initialLoadDoneRef.current) {
-        const freshIds = data
+        const freshIds = mapped
           .filter(o => o.status === 'pending' && !knownIdsRef.current.has(o.id))
           .map(o => o.id);
         if (freshIds.length > 0) triggerAlert(freshIds);
       }
 
-      data.forEach(o => knownIdsRef.current.add(o.id));
+      mapped.forEach(o => knownIdsRef.current.add(o.id));
       initialLoadDoneRef.current = true;
 
       setOrders(active);
