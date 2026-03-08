@@ -15,6 +15,7 @@ import AdminRelatorios from "./pages/admin/AdminRelatorios";
 import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
 import AdminCupons from "./pages/admin/AdminCupons";
 import OrderTracking from "./pages/OrderTracking";
+import TVFila from "./pages/TVFila";
 
 const queryClient = new QueryClient();
 
