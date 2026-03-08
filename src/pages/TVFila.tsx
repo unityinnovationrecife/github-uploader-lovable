@@ -389,13 +389,38 @@ export default function TVFila() {
                         )}
                       </div>
                       {/* Data do pedido */}
-                      <div style={{ fontSize: 12, color: '#71717a', marginBottom: 3 }}>
+                      <div style={{ fontSize: 12, color: '#71717a', marginBottom: 6 }}>
                         📅 {new Date(order.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })} às {new Date(order.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                       </div>
-                      {/* Número do pedido */}
-                      <div style={{ fontSize: 12, color: '#52525b' }}>
-                        🧾 Pedido #{shortId(order.id)}
-                      </div>
+                      {/* Itens do pedido */}
+                      {order.order_items.length > 0 && (
+                        <div style={{
+                          display: 'flex', flexDirection: 'column', gap: 3,
+                          padding: '8px 10px', borderRadius: 10,
+                          background: 'rgba(255,255,255,0.04)',
+                          border: '1px solid rgba(255,255,255,0.07)',
+                        }}>
+                          {order.order_items.map((item, i) => (
+                            <div key={i} style={{
+                              display: 'flex', alignItems: 'center', gap: 6,
+                              fontSize: 12, color: '#d4d4d8',
+                            }}>
+                              <span style={{
+                                minWidth: 20, height: 20, borderRadius: 6,
+                                background: 'rgba(249,115,22,0.2)',
+                                color: '#f97316', fontSize: 11, fontWeight: 700,
+                                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                                flexShrink: 0,
+                              }}>
+                                {item.quantity}x
+                              </span>
+                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {item.product_name}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     {/* Status badge */}
