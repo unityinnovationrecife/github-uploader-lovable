@@ -203,6 +203,7 @@ export default function CheckoutModal() {
     ownerLines.push('');
     ownerLines.push('━━━━━━━━━━━━━━━━━━━━━━━');
     ownerLines.push(`💵 Subtotal: ${formatPrice(subtotal)}`);
+    if (appliedCoupon) ownerLines.push(`🏷️ Cupom (${appliedCoupon.code}): -${formatPrice(discountAmount)}`);
     if (deliveryFee > 0) {
       ownerLines.push(`🛵 Entrega (${zoneName}): ${formatPrice(deliveryFee)}`);
     } else {
