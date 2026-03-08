@@ -448,6 +448,164 @@ export default function AdminRelatorios() {
                   Sem dados de produtos para o período selecionado.
                 </div>
               )}
+
+              {/* ── Cupons de Desconto ── */}
+              {(() => {
+                const fmt2 = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                const usedCoupons = couponStats.filter(c => c.uses_count > 0);
+                const totalUses = couponStats.reduce((s, c) => s + c.uses_count, 0);
+                const activeCoupons = couponStats.filter(c => c.active && (!c.expires_at || new Date(c.expires_at) >= new Date())).length;
+
+                return (
+                  <div className="space-y-4">
+                    {/* Summary cards */}
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="bg-card border border-border rounded-2xl p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <p className="text-xs text-muted-foreground">Cupons cadastrados</p>
+                          <Tag className="w-4 h-4 text-primary" />
+                        </div>
+                        <p className="text-xl font-bold text-foreground">{couponStats.length}</p>
+                      </div>
+                      <div className="bg-card border border-border rounded-2xl p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <p className="text-xs text-muted-foreground">Usos totais</p>
+                          <TrendingUp className="w-4 h-4 text-orange-500" />
+                        </div>
+                        <p className="text-xl font-bold text-foreground">{totalUses}</p>
+                      </div>
+                      <div className="bg-card border border-border rounded-2xl p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <p className="text-xs text-muted-foreground">Ativos agora</p>
+                          <DollarSign className="w-4 h-4 text-green-500" />
+                        </div>
+                        <p className="text-xl font-bold text-foreground">{activeCoupons}</p>
+                      </div>
+                    </div>
+
+                    {/* Table */}
+                    <div className="bg-card border border-border rounded-2xl overflow-hidden">
+                      <div className="flex items-center gap-2 px-5 py-4 border-b border-border">
+                        <Tag className="w-4 h-4 text-primary" />
+                        <h2 className="text-sm font-semibold text-foreground">Cupons — desempenho detalhado</h2>
+                      </div>
+
+                      {couponStats.length === 0 ? (
+                        <div className="text-center py-10 text-muted-foreground text-sm">
+                          Nenhum cupom cadastrado ainda.
+                        </div>
+                      ) : (
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="bg-muted/40 border-b border-border">
+                                <th className="text-left px-5 py-3 text-xs font-semibold text-muted-foreground">Código</th>
+                                <th className="text-left px-5 py-3 text-xs font-semibold text-muted-foreground">Tipo</th>
+                                <th className="text-right px-5 py-3 text-xs font-semibold text-muted-foreground">Usos</th>
+                                <th className="text-right px-5 py-3 text-xs font-semibold text-muted-foreground hidden sm:table-cell">Desconto por uso</th>
+                                <th className="text-right px-5 py-3 text-xs font-semibold text-muted-foreground hidden md:table-cell">Desconto total estimado</th>
+                                <th className="text-left px-5 py-3 text-xs font-semibold text-muted-foreground hidden md:table-cell">Validade</th>
+                                <th className="text-left px-5 py-3 text-xs font-semibold text-muted-foreground">Status</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {couponStats.map((c) => {
+                                const isExpired = c.expires_at ? new Date(c.expires_at) < new Date() : false;
+                                const isActive = c.active && !isExpired;
+                                const discountLabel = c.type === 'percent' ? `${c.value}%` : fmt2(c.value);
+                                // Estimated total discount: for fixed it's exact; for percent we can't know the exact subtotal, so show "X% × N usos"
+                                const totalDiscountLabel = c.type === 'fixed'
+                                  ? fmt2(c.value * c.uses_count)
+                                  : `${c.value}% × ${c.uses_count} uso${c.uses_count !== 1 ? 's' : ''}`;
+                                const barWidth = totalUses > 0 ? Math.round((c.uses_count / totalUses) * 100) : 0;
+
+                                return (
+                                  <tr key={c.id} className="border-b border-border last:border-0 hover:bg-muted/20 transition-colors">
+                                    <td className="px-5 py-3">
+                                      <span className="font-mono font-bold text-foreground tracking-wider bg-muted px-2 py-0.5 rounded-lg text-xs">
+                                        {c.code}
+                                      </span>
+                                    </td>
+                                    <td className="px-5 py-3 text-muted-foreground">
+                                      {c.type === 'percent' ? 'Percentual' : 'Fixo'}
+                                    </td>
+                                    <td className="px-5 py-3 text-right">
+                                      <div className="flex items-center justify-end gap-2">
+                                        <div className="hidden sm:block w-16 h-1.5 bg-muted rounded-full overflow-hidden">
+                                          <div className="h-full bg-primary rounded-full" style={{ width: `${barWidth}%` }} />
+                                        </div>
+                                        <span className="font-semibold text-foreground">{c.uses_count}</span>
+                                      </div>
+                                    </td>
+                                    <td className="px-5 py-3 text-right hidden sm:table-cell text-primary font-medium">
+                                      {discountLabel}
+                                    </td>
+                                    <td className="px-5 py-3 text-right hidden md:table-cell text-muted-foreground">
+                                      {c.uses_count > 0 ? totalDiscountLabel : '—'}
+                                    </td>
+                                    <td className="px-5 py-3 hidden md:table-cell text-muted-foreground text-xs">
+                                      {c.expires_at
+                                        ? <span className={isExpired ? 'text-destructive font-medium' : ''}>
+                                            {new Date(c.expires_at).toLocaleDateString('pt-BR')}
+                                          </span>
+                                        : 'Sem validade'}
+                                    </td>
+                                    <td className="px-5 py-3">
+                                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${
+                                        isActive
+                                          ? 'bg-green-500/15 text-green-600'
+                                          : 'bg-muted text-muted-foreground'
+                                      }`}>
+                                        {isActive ? 'Ativo' : isExpired ? 'Expirado' : 'Inativo'}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+
+                          {/* Bar chart for used coupons */}
+                          {usedCoupons.length > 0 && (
+                            <div className="px-5 py-4 border-t border-border">
+                              <p className="text-xs font-semibold text-muted-foreground mb-3">Usos por cupom</p>
+                              <ResponsiveContainer width="100%" height={Math.max(120, usedCoupons.length * 36)}>
+                                <BarChart
+                                  data={usedCoupons}
+                                  layout="vertical"
+                                  margin={{ top: 0, right: 8, left: 8, bottom: 0 }}
+                                >
+                                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
+                                  <XAxis
+                                    type="number"
+                                    allowDecimals={false}
+                                    tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                                    tickLine={false}
+                                    axisLine={false}
+                                  />
+                                  <YAxis
+                                    type="category"
+                                    dataKey="code"
+                                    width={90}
+                                    tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                                    tickLine={false}
+                                    axisLine={false}
+                                  />
+                                  <Tooltip
+                                    contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 12, fontSize: 12 }}
+                                    formatter={(value: number) => [value, 'Usos']}
+                                  />
+                                  <Bar dataKey="uses_count" fill="hsl(var(--primary))" radius={[0, 6, 6, 0]} name="Usos" />
+                                </BarChart>
+                              </ResponsiveContainer>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
             </>
           )}
         </div>
