@@ -6,7 +6,6 @@ import {
   Archive, ArchiveRestore, Search, Filter, Phone,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useOrderSound } from '@/hooks/use-order-sound';
 
 type OrderItem = {
   id: string;
@@ -67,7 +66,6 @@ export default function AdminPedidos() {
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const { toast } = useToast();
-  const { playNotification } = useOrderSound();
   const isFirstLoad = useRef(true);
 
   const pendingCount = orders.filter((o) => !o.archived && o.status === 'pending').length;
@@ -119,17 +117,13 @@ export default function AdminPedidos() {
   };
 
   // Realtime: novos pedidos prepend na lista (só se na pág 0 e sem filtros ativos)
+  // Nota: som e toast de notificação são gerenciados pelo AdminLayout via usePendingOrders
   useEffect(() => {
     const channel = supabase
       .channel('admin-orders')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, (payload) => {
         const newOrder = payload.new as Order;
         if (!isFirstLoad.current) {
-          playNotification();
-          toast({
-            title: '🛎️ Novo pedido!',
-            description: `${newOrder.customer_name} — ${newOrder.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`,
-          });
           // Prepend apenas se estiver na primeira página de ativos sem filtros
           if (page === 0 && !showArchived && statusFilter === 'all' && !search) {
             setOrders((prev) => [newOrder, ...prev.slice(0, PAGE_SIZE - 1)]);

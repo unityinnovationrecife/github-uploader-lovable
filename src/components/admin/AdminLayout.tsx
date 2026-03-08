@@ -3,11 +3,13 @@ import { useNavigate, NavLink, Outlet } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { ChefHat, Package, ShoppingBag, UtensilsCrossed, LogOut, Menu, X, Store, BarChart2, Settings } from 'lucide-react';
 import logo from '@/assets/logo.png';
+import { usePendingOrders } from '@/hooks/use-pending-orders';
 
 export default function AdminLayout() {
   const navigate = useNavigate();
   const [checking, setChecking] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
+  const { pendingCount } = usePendingOrders();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -36,11 +38,11 @@ export default function AdminLayout() {
   }
 
   const navItems = [
-    { to: '/admin/produtos', icon: Package, label: 'Produtos' },
-    { to: '/admin/pedidos', icon: ShoppingBag, label: 'Pedidos' },
-    { to: '/admin/acompanhamentos', icon: UtensilsCrossed, label: 'Acompanhamentos' },
-    { to: '/admin/relatorios', icon: BarChart2, label: 'Relatórios' },
-    { to: '/admin/configuracoes', icon: Settings, label: 'Configurações' },
+    { to: '/admin/produtos', icon: Package, label: 'Produtos', badge: 0 },
+    { to: '/admin/pedidos', icon: ShoppingBag, label: 'Pedidos', badge: pendingCount },
+    { to: '/admin/acompanhamentos', icon: UtensilsCrossed, label: 'Acompanhamentos', badge: 0 },
+    { to: '/admin/relatorios', icon: BarChart2, label: 'Relatórios', badge: 0 },
+    { to: '/admin/configuracoes', icon: Settings, label: 'Configurações', badge: 0 },
   ];
 
   return (
@@ -54,7 +56,7 @@ export default function AdminLayout() {
         </div>
 
         <nav className="flex-1 p-4 space-y-1">
-          {navItems.map(({ to, icon: Icon, label }) => (
+          {navItems.map(({ to, icon: Icon, label, badge }) => (
             <NavLink
               key={to}
               to={to}
@@ -66,8 +68,23 @@ export default function AdminLayout() {
                 }`
               }
             >
-              <Icon className="w-4 h-4" />
-              {label}
+              {({ isActive }) => (
+                <>
+                  <Icon className="w-4 h-4 flex-shrink-0" />
+                  <span className="flex-1">{label}</span>
+                  {badge > 0 && (
+                    <span
+                      className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold leading-none ${
+                        isActive
+                          ? 'bg-primary-foreground text-primary'
+                          : 'bg-destructive text-destructive-foreground animate-pulse'
+                      }`}
+                    >
+                      {badge > 99 ? '99+' : badge}
+                    </span>
+                  )}
+                </>
+              )}
             </NavLink>
           ))}
         </nav>
@@ -98,16 +115,24 @@ export default function AdminLayout() {
           </div>
           <span className="font-bold text-foreground text-sm">Admin</span>
         </div>
-        <button onClick={() => setMenuOpen(!menuOpen)} className="p-2 rounded-lg hover:bg-muted transition-colors">
-          {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Badge de pedidos pendentes no mobile header */}
+          {pendingCount > 0 && (
+            <span className="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full text-xs font-bold bg-destructive text-destructive-foreground animate-pulse">
+              {pendingCount > 99 ? '99+' : pendingCount}
+            </span>
+          )}
+          <button onClick={() => setMenuOpen(!menuOpen)} className="p-2 rounded-lg hover:bg-muted transition-colors">
+            {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu */}
       {menuOpen && (
         <div className="md:hidden fixed inset-0 z-40 bg-black/50" onClick={() => setMenuOpen(false)}>
           <div className="absolute top-14 left-0 right-0 bg-card border-b border-border p-4 space-y-1" onClick={e => e.stopPropagation()}>
-            {navItems.map(({ to, icon: Icon, label }) => (
+            {navItems.map(({ to, icon: Icon, label, badge }) => (
               <NavLink
                 key={to}
                 to={to}
@@ -120,8 +145,23 @@ export default function AdminLayout() {
                   }`
                 }
               >
-                <Icon className="w-4 h-4" />
-                {label}
+                {({ isActive }) => (
+                  <>
+                    <Icon className="w-4 h-4 flex-shrink-0" />
+                    <span className="flex-1">{label}</span>
+                    {badge > 0 && (
+                      <span
+                        className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold leading-none ${
+                          isActive
+                            ? 'bg-primary-foreground text-primary'
+                            : 'bg-destructive text-destructive-foreground animate-pulse'
+                        }`}
+                      >
+                        {badge > 99 ? '99+' : badge}
+                      </span>
+                    )}
+                  </>
+                )}
               </NavLink>
             ))}
             <button
