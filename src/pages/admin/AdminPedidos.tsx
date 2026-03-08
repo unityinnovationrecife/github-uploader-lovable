@@ -54,11 +54,14 @@ export default function AdminPedidos() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [loadingItems, setLoadingItems] = useState<string | null>(null);
   const { toast } = useToast();
+  const { playNotification } = useOrderSound();
+  const isFirstLoad = useRef(true);
 
   const fetchOrders = async () => {
     const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
     setOrders(data || []);
     setLoading(false);
+    isFirstLoad.current = false;
   };
 
   useEffect(() => {
@@ -71,7 +74,17 @@ export default function AdminPedidos() {
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'orders' },
         (payload) => {
-          setOrders((prev) => [payload.new as Order, ...prev]);
+          const newOrder = payload.new as Order;
+          setOrders((prev) => [newOrder, ...prev]);
+
+          // Som + toast de novo pedido (ignora durante carregamento inicial)
+          if (!isFirstLoad.current) {
+            playNotification();
+            toast({
+              title: '🛎️ Novo pedido!',
+              description: `${newOrder.customer_name} — ${newOrder.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`,
+            });
+          }
         }
       )
       .on(
