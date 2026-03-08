@@ -3,13 +3,15 @@ import { useCartStore } from '@/store/cart-store';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import { useDeliveryZones } from '@/hooks/use-store-settings';
 
-type DeliveryZone = 'residence' | 'dois_unidos' | '';
 type Step = 1 | 2;
 
 export default function CheckoutModal() {
   const { items, isCheckoutOpen, closeCheckout, getTotalPrice, clearCart, removeItem } = useCartStore();
   const navigate = useNavigate();
+  const { zones, loading: zonesLoading } = useDeliveryZones();
+
   const [step, setStep] = useState<Step>(1);
   const [nome, setNome] = useState('');
   const [telefone, setTelefone] = useState('');
@@ -17,10 +19,13 @@ export default function CheckoutModal() {
   const [numero, setNumero] = useState('');
   const [referencia, setReferencia] = useState('');
   const [pagamento, setPagamento] = useState('');
-  const [zone, setZone] = useState<DeliveryZone>('');
+  const [zoneKey, setZoneKey] = useState('');
   const [mounted, setMounted] = useState(false);
 
-  const endereco = zone === 'residence'
+  const selectedZone = zones.find(z => z.key === zoneKey);
+  const isResidence = zoneKey === 'residence';
+
+  const endereco = isResidence
     ? [rua, numero].filter(Boolean).join(', ')
     : [rua, numero, referencia].filter(Boolean).join(', ');
 
@@ -36,20 +41,13 @@ export default function CheckoutModal() {
   const formatPrice = (price: number) =>
     price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-  const getDeliveryFee = () => (zone === 'dois_unidos' ? 3 : 0);
-  const getZoneName = () => {
-    if (zone === 'residence') return 'Residence Club Dr. Moacyr André Gomes';
-    if (zone === 'dois_unidos') return 'Dois Unidos';
-    return '';
-  };
-
-  const deliveryFee = getDeliveryFee();
+  const deliveryFee = selectedZone?.fee ?? 0;
   const subtotal = getTotalPrice();
   const finalTotal = subtotal + deliveryFee;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!zone) { alert('Por favor, selecione seu bairro/condomínio para entrega.'); return; }
+    if (!zoneKey) { alert('Por favor, selecione seu bairro/condomínio para entrega.'); return; }
 
     let savedOrderId: string | null = null;
 
@@ -59,8 +57,8 @@ export default function CheckoutModal() {
         .insert({
           customer_name: nome,
           customer_phone: telefone || null,
-          delivery_zone: zone,
-          delivery_zone_name: getZoneName(),
+          delivery_zone: zoneKey,
+          delivery_zone_name: selectedZone?.name ?? zoneKey,
           address: endereco,
           payment_method: pagamento,
           subtotal,
@@ -89,6 +87,7 @@ export default function CheckoutModal() {
 
     const now = new Date().toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
     const totalItems = items.reduce((acc, i) => acc + i.quantity, 0);
+    const zoneName = selectedZone?.name ?? zoneKey;
 
     // ── Mensagem para o lojista ──
     const ownerLines: string[] = [];
@@ -108,9 +107,9 @@ export default function CheckoutModal() {
     ownerLines.push('━━━━━━━━━━━━━━━━━━━━━━━');
     ownerLines.push(`💵 Subtotal: ${formatPrice(subtotal)}`);
     if (deliveryFee > 0) {
-      ownerLines.push(`🛵 Entrega (${getZoneName()}): ${formatPrice(deliveryFee)}`);
+      ownerLines.push(`🛵 Entrega (${zoneName}): ${formatPrice(deliveryFee)}`);
     } else {
-      ownerLines.push(`🛵 Entrega (${getZoneName()}): *Grátis* ✅`);
+      ownerLines.push(`🛵 Entrega (${zoneName}): *Grátis* ✅`);
     }
     ownerLines.push(`💳 Pagamento: ${pagamento}`);
     ownerLines.push('');
@@ -121,7 +120,7 @@ export default function CheckoutModal() {
     ownerLines.push(`👤 Cliente: ${nome}`);
     if (telefone) ownerLines.push(`📱 Telefone: ${telefone}`);
     ownerLines.push(`🏠 Endereço: ${endereco}`);
-    ownerLines.push(`📌 Bairro: ${getZoneName()}`);
+    ownerLines.push(`📌 Bairro: ${zoneName}`);
     ownerLines.push('');
     ownerLines.push('_Pedido gerado automaticamente pelo site_ 🤖');
 
@@ -164,7 +163,7 @@ export default function CheckoutModal() {
 
     clearCart();
     closeCheckout();
-    setNome(''); setTelefone(''); setRua(''); setNumero(''); setReferencia(''); setPagamento(''); setZone('');
+    setNome(''); setTelefone(''); setRua(''); setNumero(''); setReferencia(''); setPagamento(''); setZoneKey('');
 
     if (savedOrderId) {
       navigate(`/pedido/${savedOrderId}`);
@@ -339,20 +338,30 @@ export default function CheckoutModal() {
                     Bairro / Condomínio de Entrega
                   </label>
                   <div className="space-y-2">
-                    <label className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${zone === 'residence' ? 'border-orange-500 bg-orange-500/10' : 'border-[var(--border-color)] bg-[var(--bg-primary)] hover:border-orange-500/30'}`}>
-                      <input type="radio" name="zone" value="residence" checked={zone === 'residence'} onChange={() => setZone('residence')} className="w-4 h-4 accent-orange-500" required />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-[var(--text-primary)]">Residence Club Dr. Moacyr André Gomes</p>
-                        <p className="text-xs text-green-500 font-medium">Entrega Grátis</p>
-                      </div>
-                    </label>
-                    <label className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${zone === 'dois_unidos' ? 'border-orange-500 bg-orange-500/10' : 'border-[var(--border-color)] bg-[var(--bg-primary)] hover:border-orange-500/30'}`}>
-                      <input type="radio" name="zone" value="dois_unidos" checked={zone === 'dois_unidos'} onChange={() => setZone('dois_unidos')} className="w-4 h-4 accent-orange-500" required />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-[var(--text-primary)]">Dois Unidos</p>
-                        <p className="text-xs text-[var(--text-secondary)]">Taxa: R$ 3,00</p>
-                      </div>
-                    </label>
+                    {zonesLoading ? (
+                      <div className="text-sm text-[var(--text-muted)] italic py-2">Carregando zonas...</div>
+                    ) : zones.map(zone => (
+                      <label
+                        key={zone.key}
+                        className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${zoneKey === zone.key ? 'border-orange-500 bg-orange-500/10' : 'border-[var(--border-color)] bg-[var(--bg-primary)] hover:border-orange-500/30'}`}
+                      >
+                        <input
+                          type="radio"
+                          name="zone"
+                          value={zone.key}
+                          checked={zoneKey === zone.key}
+                          onChange={() => setZoneKey(zone.key)}
+                          className="w-4 h-4 accent-orange-500"
+                          required
+                        />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-[var(--text-primary)]">{zone.name}</p>
+                          <p className={`text-xs font-medium ${zone.fee === 0 ? 'text-green-500' : 'text-[var(--text-secondary)]'}`}>
+                            {zone.fee === 0 ? 'Entrega Grátis' : `Taxa: ${zone.fee.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`}
+                          </p>
+                        </div>
+                      </label>
+                    ))}
                   </div>
                   <p className="text-xs text-orange-500/80 mt-2 italic">⚠️ Entregas apenas nas localidades acima.</p>
                 </div>
@@ -361,7 +370,7 @@ export default function CheckoutModal() {
                 <div>
                   <label className="flex items-center gap-2 text-sm font-medium text-[var(--text-muted)] mb-2">
                     <MapPin className="w-4 h-4" />
-                    {zone === 'residence' ? 'Bloco e Apartamento' : 'Endereço'}
+                    {isResidence ? 'Bloco e Apartamento' : 'Endereço'}
                   </label>
                   <div className="space-y-2">
                     <div className="flex gap-2">
@@ -370,8 +379,8 @@ export default function CheckoutModal() {
                         value={rua}
                         onChange={(e) => setRua(e.target.value)}
                         required
-                        placeholder={zone === 'residence' ? 'Bloco' : 'Rua'}
-                        disabled={!zone}
+                        placeholder={isResidence ? 'Bloco' : 'Rua'}
+                        disabled={!zoneKey}
                         className="w-[70%] px-4 py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       />
                       <input
@@ -379,18 +388,18 @@ export default function CheckoutModal() {
                         value={numero}
                         onChange={(e) => setNumero(e.target.value)}
                         required
-                        placeholder={zone === 'residence' ? 'Apto' : 'Nº'}
-                        disabled={!zone}
+                        placeholder={isResidence ? 'Apto' : 'Nº'}
+                        disabled={!zoneKey}
                         className="w-[30%] px-4 py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       />
                     </div>
-                    {zone !== 'residence' && (
+                    {!isResidence && (
                       <input
                         type="text"
                         value={referencia}
                         onChange={(e) => setReferencia(e.target.value)}
                         placeholder="Referência (opcional)"
-                        disabled={!zone}
+                        disabled={!zoneKey}
                         className="w-full px-4 py-3 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       />
                     )}
@@ -425,7 +434,7 @@ export default function CheckoutModal() {
                 </div>
 
                 {/* Total com entrega */}
-                {zone && (
+                {zoneKey && (
                   <div className="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl p-4 space-y-1.5">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-[var(--text-secondary)]">Subtotal</span>
