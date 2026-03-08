@@ -241,6 +241,7 @@ export default function HomeClient() {
         onClose={handleClosePastelModal}
         acompanhamentos={acompanhamentos}
       />
+      <WhatsAppButton />
     </div>
   );
 }
