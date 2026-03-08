@@ -108,7 +108,9 @@ export default function TVFila() {
       .order('created_at', { ascending: true });
 
     if (data) {
-      const active = data.filter(o => ACTIVE_STATUSES.includes(o.status));
+      const active = data
+        .filter(o => ACTIVE_STATUSES.includes(o.status))
+        .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
       const delivered = data.filter(o => o.status === 'delivered').slice(-6).reverse();
 
       // Detect new orders (only after initial load)
