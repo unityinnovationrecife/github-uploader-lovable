@@ -488,8 +488,16 @@ export default function AdminPedidos() {
                         </div>
                       )}
 
-                      {/* Arquivar / Restaurar */}
-                      <div className="pt-2 border-t border-border">
+                      {/* Ações: Imprimir + Arquivar / Restaurar */}
+                      <div className="pt-2 border-t border-border flex items-center gap-2 flex-wrap">
+                        <button
+                          onClick={() => printOrder(order)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-all"
+                          title="Imprimir comprovante 80mm"
+                        >
+                          <Printer className="w-3.5 h-3.5" />
+                          Imprimir
+                        </button>
                         <button
                           onClick={() => toggleArchive(order)}
                           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all ${
