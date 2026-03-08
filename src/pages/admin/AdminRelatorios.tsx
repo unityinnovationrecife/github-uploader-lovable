@@ -269,11 +269,12 @@ export default function AdminRelatorios() {
 
   const fmt = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-  const handleExport = async (type: 'csv-orders' | 'csv-products' | 'pdf') => {
+  const handleExport = async (type: 'csv-orders' | 'csv-products' | 'csv-coupons' | 'pdf') => {
     setExporting(true);
     try {
       if (type === 'csv-orders') exportOrdersCSV(allOrders, period);
       else if (type === 'csv-products') exportProductsCSV(topProducts, period);
+      else if (type === 'csv-coupons') exportCouponsCSV(couponStats);
       else if (type === 'pdf') await exportOrdersPDF(allOrders, period, stats);
     } finally {
       setExporting(false);
