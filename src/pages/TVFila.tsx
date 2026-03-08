@@ -359,7 +359,8 @@ export default function TVFila() {
 
                     {/* Info */}
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                      {/* Nome + badge */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
                         <span style={{
                           fontSize: 22, fontWeight: 800,
                           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
@@ -376,8 +377,13 @@ export default function TVFila() {
                           </span>
                         )}
                       </div>
+                      {/* Data do pedido */}
+                      <div style={{ fontSize: 12, color: '#71717a', marginBottom: 3 }}>
+                        📅 {new Date(order.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })} às {new Date(order.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                      </div>
+                      {/* Número do pedido */}
                       <div style={{ fontSize: 12, color: '#52525b' }}>
-                        Pedido #{shortId(order.id)} · {new Date(order.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                        🧾 Pedido #{shortId(order.id)}
                       </div>
                     </div>
 
