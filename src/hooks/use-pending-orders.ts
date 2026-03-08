@@ -2,16 +2,18 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrderSound } from '@/hooks/use-order-sound';
 import { useToast } from '@/hooks/use-toast';
+import { useBrowserNotification } from '@/hooks/use-browser-notification';
 
 /**
  * Escuta novos pedidos via Supabase Realtime.
  * Mantém a contagem de pedidos pendentes (não arquivados).
- * Dispara som + toast a cada novo INSERT com status "pending".
+ * Dispara som + toast + notificação push a cada novo INSERT com status "pending".
  */
 export function usePendingOrders() {
   const [pendingCount, setPendingCount] = useState(0);
   const { playNotification } = useOrderSound();
   const { toast } = useToast();
+  const { notify } = useBrowserNotification();
   const initializedRef = useRef(false);
 
   // Busca contagem atual de pendentes ao montar
@@ -41,12 +43,21 @@ export function usePendingOrders() {
           if (newOrder.status === 'pending' && !newOrder.archived) {
             setPendingCount((c) => c + 1);
             playNotification();
+
+            const totalFormatted = newOrder.total.toLocaleString('pt-BR', {
+              style: 'currency',
+              currency: 'BRL',
+            });
+
             toast({
               title: '🛎️ Novo pedido!',
-              description: `${newOrder.customer_name} — ${newOrder.total.toLocaleString('pt-BR', {
-                style: 'currency',
-                currency: 'BRL',
-              })}`,
+              description: `${newOrder.customer_name} — ${totalFormatted}`,
+            });
+
+            // Notificação push (visível mesmo com aba em segundo plano)
+            notify('🛎️ Novo pedido!', {
+              body: `${newOrder.customer_name} — ${totalFormatted}`,
+              tag: 'new-order', // Agrupa notificações do mesmo tipo
             });
           }
         }
@@ -62,10 +73,8 @@ export function usePendingOrders() {
           const isActive = updated.status === 'pending' && !updated.archived;
 
           if (wasActive && !isActive) {
-            // Saiu de pendente → decrementa
             setPendingCount((c) => Math.max(0, c - 1));
           } else if (!wasActive && isActive) {
-            // Voltou para pendente → incrementa
             setPendingCount((c) => c + 1);
           }
         }
@@ -75,7 +84,7 @@ export function usePendingOrders() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [fetchPendingCount, playNotification, toast]);
+  }, [fetchPendingCount, playNotification, toast, notify]);
 
   const clearBadge = useCallback(() => setPendingCount(0), []);
 

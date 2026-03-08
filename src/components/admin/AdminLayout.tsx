@@ -1,15 +1,20 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, NavLink, Outlet } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { ChefHat, Package, ShoppingBag, UtensilsCrossed, LogOut, Menu, X, Store, BarChart2, Settings } from 'lucide-react';
+import {
+  ChefHat, Package, ShoppingBag, UtensilsCrossed, LogOut,
+  Menu, X, Store, BarChart2, Settings, Bell, BellOff, BellRing,
+} from 'lucide-react';
 import logo from '@/assets/logo.png';
 import { usePendingOrders } from '@/hooks/use-pending-orders';
+import { useBrowserNotification } from '@/hooks/use-browser-notification';
 
 export default function AdminLayout() {
   const navigate = useNavigate();
   const [checking, setChecking] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const { pendingCount } = usePendingOrders();
+  const { permission, isSupported, requestPermission } = useBrowserNotification();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -44,6 +49,49 @@ export default function AdminLayout() {
     { to: '/admin/relatorios', icon: BarChart2, label: 'Relatórios', badge: 0 },
     { to: '/admin/configuracoes', icon: Settings, label: 'Configurações', badge: 0 },
   ];
+
+  // Botão de notificação push: renderização condicional por estado
+  const NotifButton = ({ mobile = false }: { mobile?: boolean }) => {
+    if (!isSupported) return null;
+
+    if (permission === 'granted') {
+      return (
+        <div
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-green-600 ${
+            mobile ? '' : 'cursor-default'
+          }`}
+          title="Notificações push ativadas"
+        >
+          <BellRing className="w-4 h-4 flex-shrink-0" />
+          <span>Notificações ativas</span>
+        </div>
+      );
+    }
+
+    if (permission === 'denied') {
+      return (
+        <div
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-muted-foreground cursor-not-allowed"
+          title="Permissão negada pelo navegador. Habilite nas configurações do navegador."
+        >
+          <BellOff className="w-4 h-4 flex-shrink-0" />
+          <span>Notificações bloqueadas</span>
+        </div>
+      );
+    }
+
+    // 'default' — ainda não pediu
+    return (
+      <button
+        onClick={requestPermission}
+        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-primary hover:bg-primary/10 transition-all w-full border border-primary/20"
+        title="Receba alertas mesmo com a aba em segundo plano"
+      >
+        <Bell className="w-4 h-4 flex-shrink-0 animate-bounce" />
+        <span>Ativar notificações</span>
+      </button>
+    );
+  };
 
   return (
     <div className="h-screen bg-background flex overflow-hidden">
@@ -90,6 +138,8 @@ export default function AdminLayout() {
         </nav>
 
         <div className="p-4 border-t border-border space-y-1">
+          {/* Botão de notificações push */}
+          <NotifButton />
           <a
             href="/"
             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-all w-full"
@@ -116,7 +166,6 @@ export default function AdminLayout() {
           <span className="font-bold text-foreground text-sm">Admin</span>
         </div>
         <div className="flex items-center gap-2">
-          {/* Badge de pedidos pendentes no mobile header */}
           {pendingCount > 0 && (
             <span className="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full text-xs font-bold bg-destructive text-destructive-foreground animate-pulse">
               {pendingCount > 99 ? '99+' : pendingCount}
@@ -164,9 +213,13 @@ export default function AdminLayout() {
                 )}
               </NavLink>
             ))}
+            {/* Botão de notificações no menu mobile */}
+            <div className="pt-2 border-t border-border mt-2">
+              <NotifButton mobile />
+            </div>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all w-full mt-2"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all w-full"
             >
               <LogOut className="w-4 h-4" />
               Sair
