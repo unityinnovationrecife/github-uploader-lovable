@@ -443,6 +443,15 @@ export default function AdminProdutos() {
 
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
+                    type="checkbox" checked={form.featured}
+                    onChange={e => setForm({ ...form, featured: e.target.checked })}
+                    className="rounded accent-primary"
+                  />
+                  <span className="text-sm font-medium text-foreground">🔥 Produto em destaque? <span className="text-xs text-muted-foreground font-normal">(exibe badge "Mais pedido")</span></span>
+                </label>
+
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
                     type="checkbox" checked={form.has_flavors}
                     onChange={e => setForm({ ...form, has_flavors: e.target.checked })}
                     className="rounded accent-primary"
