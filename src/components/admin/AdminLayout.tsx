@@ -3,7 +3,7 @@ import { useNavigate, NavLink, Outlet } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import {
   ChefHat, Package, ShoppingBag, UtensilsCrossed, LogOut,
-  Menu, X, Store, BarChart2, Settings, Bell, BellOff, BellRing,
+  Menu, X, Store, BarChart2, Settings, Bell, BellOff, BellRing, Tag,
 } from 'lucide-react';
 import logo from '@/assets/logo.png';
 import { usePendingOrders } from '@/hooks/use-pending-orders';
@@ -46,6 +46,7 @@ export default function AdminLayout() {
     { to: '/admin/produtos', icon: Package, label: 'Produtos', badge: 0 },
     { to: '/admin/pedidos', icon: ShoppingBag, label: 'Pedidos', badge: pendingCount },
     { to: '/admin/acompanhamentos', icon: UtensilsCrossed, label: 'Acompanhamentos', badge: 0 },
+    { to: '/admin/cupons', icon: Tag, label: 'Cupons', badge: 0 },
     { to: '/admin/relatorios', icon: BarChart2, label: 'Relatórios', badge: 0 },
     { to: '/admin/configuracoes', icon: Settings, label: 'Configurações', badge: 0 },
   ];

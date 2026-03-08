@@ -13,6 +13,7 @@ import AdminPedidos from "./pages/admin/AdminPedidos";
 import AdminAcompanhamentos from "./pages/admin/AdminAcompanhamentos";
 import AdminRelatorios from "./pages/admin/AdminRelatorios";
 import AdminConfiguracoes from "./pages/admin/AdminConfiguracoes";
+import AdminCupons from "./pages/admin/AdminCupons";
 import OrderTracking from "./pages/OrderTracking";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
               <Route path="produtos" element={<AdminProdutos />} />
               <Route path="pedidos" element={<AdminPedidos />} />
               <Route path="acompanhamentos" element={<AdminAcompanhamentos />} />
+              <Route path="cupons" element={<AdminCupons />} />
               <Route path="relatorios" element={<AdminRelatorios />} />
               <Route path="configuracoes" element={<AdminConfiguracoes />} />
             </Route>
