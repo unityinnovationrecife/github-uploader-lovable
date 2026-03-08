@@ -254,6 +254,13 @@ export default function AdminRelatorios() {
         setTopProducts([]);
       }
 
+      // Load coupon stats (all coupons, ordered by uses)
+      const { data: coupons } = await supabase
+        .from('coupons' as any)
+        .select('id, code, type, value, uses_count, active, expires_at')
+        .order('uses_count', { ascending: false });
+      setCouponStats((coupons ?? []) as unknown as CouponStat[]);
+
       setLoading(false);
     };
 
