@@ -10,6 +10,8 @@ export interface Product {
   availableFlavors?: string[];
   maxFlavors?: number;
   allowDuplicateFlavors?: boolean;
+  /** false = produto esgotado: aparece no cardápio com badge, sem botão de compra */
+  available?: boolean;
 }
 
 export interface CartItem extends Product {
