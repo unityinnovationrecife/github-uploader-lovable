@@ -183,6 +183,7 @@ export default function AdminRelatorios() {
   const [dayStats, setDayStats] = useState<DayStat[]>([]);
   const [topProducts, setTopProducts] = useState<ProductStat[]>([]);
   const [allOrders, setAllOrders] = useState<FullOrder[]>([]);
+  const [couponStats, setCouponStats] = useState<CouponStat[]>([]);
 
   useEffect(() => {
     document.title = 'Relatórios | Admin';
