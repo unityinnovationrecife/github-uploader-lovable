@@ -40,6 +40,7 @@ type Order = {
   status: string;
   created_at: string;
   customer_phone: string | null;
+  notes?: string | null;
 };
 
 type StatusStep = {
