@@ -58,7 +58,6 @@ export function usePendingOrders() {
             notify('🛎️ Novo pedido!', {
               body: `${newOrder.customer_name} — ${totalFormatted}`,
               tag: 'new-order', // Agrupa notificações do mesmo tipo
-              renotify: true,   // Reedita mesmo com mesmo tag
             });
           }
         }
