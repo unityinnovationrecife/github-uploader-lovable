@@ -32,7 +32,8 @@ Deno.serve(async (req) => {
       });
     }
 
-    const url = `${EVOLUTION_API_URL}/message/sendText/${EVOLUTION_INSTANCE}`;
+    const baseUrl = EVOLUTION_API_URL.replace(/\/+$/, '');
+    const url = `${baseUrl}/message/sendText/${EVOLUTION_INSTANCE}`;
 
     const response = await fetch(url, {
       method: 'POST',
