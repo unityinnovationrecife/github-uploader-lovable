@@ -107,7 +107,18 @@ export default function CheckoutModal() {
     lines.push('');
     lines.push('Agradecemos a preferencia!');
 
-    window.open(`https://wa.me/5581992429014?text=${encodeURIComponent(lines.join('\n'))}`, '_blank');
+    const message = lines.join('\n');
+
+    // Try sending via Evolution API (automatic WhatsApp)
+    const { error: fnError } = await supabase.functions.invoke('send-whatsapp', {
+      body: { message },
+    });
+
+    if (fnError) {
+      console.warn('Evolution API falhou, abrindo WhatsApp manualmente:', fnError);
+      window.open(`https://wa.me/5581992429014?text=${encodeURIComponent(message)}`, '_blank');
+    }
+
     clearCart();
     closeCheckout();
     setNome(''); setRua(''); setNumero(''); setReferencia(''); setPagamento(''); setZone('');
