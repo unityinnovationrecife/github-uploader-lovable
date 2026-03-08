@@ -170,7 +170,7 @@ export default function CheckoutModal() {
 
     clearCart();
     closeCheckout();
-    setNome(''); setTelefone(''); setRua(''); setNumero(''); setReferencia(''); setPagamento(''); setZoneKey('');
+    setNome(''); setTelefone(''); setRua(''); setNumero(''); setReferencia(''); setPagamento(''); setZoneKey(''); setObservacoes('');
 
     if (savedOrderId) {
       navigate(`/pedido/${savedOrderId}`);
