@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import logo from '@/assets/logo.png';
 
@@ -30,7 +30,6 @@ function Clock() {
     const t = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(t);
   }, []);
-
   const pad = (n: number) => String(n).padStart(2, '0');
   return (
     <span>
@@ -39,12 +38,68 @@ function Clock() {
   );
 }
 
+/** Plays a friendly "ding-dong" alert using Web Audio API */
+function playNewOrderSound(ctx: AudioContext) {
+  const now = ctx.currentTime;
+
+  const playNote = (freq: number, startTime: number, duration: number, gainVal: number) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, startTime);
+
+    gain.gain.setValueAtTime(0, startTime);
+    gain.gain.linearRampToValueAtTime(gainVal, startTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+    osc.start(startTime);
+    osc.stop(startTime + duration);
+  };
+
+  // Ding-dong: two pleasant tones
+  playNote(880, now,        0.5, 0.4);  // A5
+  playNote(660, now + 0.22, 0.6, 0.35); // E5
+}
+
 export default function TVFila() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [recentDelivered, setRecentDelivered] = useState<Order[]>([]);
   const [lastUpdate, setLastUpdate] = useState(new Date());
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [newOrderFlash, setNewOrderFlash] = useState(false);
 
-  const fetchOrders = async () => {
+  // AudioContext — created on first user interaction to comply with browser autoplay policy
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  // Track known order IDs to detect genuinely new ones
+  const knownIdsRef = useRef<Set<string>>(new Set());
+  // Whether first load is done (don't alert on initial fetch)
+  const initialLoadDoneRef = useRef(false);
+
+  const getAudioCtx = useCallback(() => {
+    if (!audioCtxRef.current) {
+      audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    return audioCtxRef.current;
+  }, []);
+
+  const triggerAlert = useCallback(() => {
+    if (!soundEnabled) return;
+    try {
+      const ctx = getAudioCtx();
+      if (ctx.state === 'suspended') ctx.resume();
+      playNewOrderSound(ctx);
+    } catch (e) {
+      console.warn('Audio error:', e);
+    }
+    // Flash screen briefly
+    setNewOrderFlash(true);
+    setTimeout(() => setNewOrderFlash(false), 800);
+  }, [soundEnabled, getAudioCtx]);
+
+  const fetchOrders = useCallback(async () => {
     const { data } = await supabase
       .from('orders')
       .select('id, customer_name, status, created_at')
@@ -54,16 +109,24 @@ export default function TVFila() {
 
     if (data) {
       const active = data.filter(o => ACTIVE_STATUSES.includes(o.status));
-      const delivered = data
-        .filter(o => o.status === 'delivered')
-        .slice(-6)
-        .reverse();
+      const delivered = data.filter(o => o.status === 'delivered').slice(-6).reverse();
+
+      // Detect new orders (only after initial load)
+      if (initialLoadDoneRef.current) {
+        const incomingPending = data.filter(o => o.status === 'pending');
+        const hasNew = incomingPending.some(o => !knownIdsRef.current.has(o.id));
+        if (hasNew) triggerAlert();
+      }
+
+      // Update known IDs set
+      data.forEach(o => knownIdsRef.current.add(o.id));
+      initialLoadDoneRef.current = true;
 
       setOrders(active);
       setRecentDelivered(delivered);
       setLastUpdate(new Date());
     }
-  };
+  }, [triggerAlert]);
 
   useEffect(() => {
     fetchOrders();
@@ -76,7 +139,17 @@ export default function TVFila() {
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, []);
+  }, [fetchOrders]);
+
+  // Unlock AudioContext on first click anywhere on the page
+  useEffect(() => {
+    const unlock = () => {
+      getAudioCtx();
+      window.removeEventListener('click', unlock);
+    };
+    window.addEventListener('click', unlock);
+    return () => window.removeEventListener('click', unlock);
+  }, [getAudioCtx]);
 
   const getStatusInfo = (status: string) => STATUS_LABELS[status] ?? STATUS_LABELS['pending'];
 
@@ -84,13 +157,26 @@ export default function TVFila() {
     <div
       style={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #0a0a0f 0%, #18181b 50%, #0f0f14 100%)',
+        background: newOrderFlash
+          ? 'linear-gradient(135deg, #1a1200 0%, #2a1a00 50%, #1a1200 100%)'
+          : 'linear-gradient(135deg, #0a0a0f 0%, #18181b 50%, #0f0f14 100%)',
         fontFamily: "'Poppins', Arial, sans-serif",
         color: '#ffffff',
         display: 'flex',
         flexDirection: 'column',
+        transition: 'background 0.3s ease',
       }}
     >
+      {/* New order flash overlay */}
+      {newOrderFlash && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 50, pointerEvents: 'none',
+          border: '6px solid #f59e0b',
+          borderRadius: 0,
+          animation: 'tv-flash 0.8s ease-out forwards',
+        }} />
+      )}
+
       {/* Header */}
       <header
         style={{
@@ -113,12 +199,32 @@ export default function TVFila() {
           </div>
         </div>
 
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 36, fontWeight: 700, fontVariantNumeric: 'tabular-nums', color: '#f97316' }}>
-            <Clock />
-          </div>
-          <div style={{ fontSize: 12, color: '#71717a' }}>
-            Últ. atualiz: {lastUpdate.toLocaleTimeString('pt-BR')}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+          {/* Sound toggle button */}
+          <button
+            onClick={() => setSoundEnabled(v => !v)}
+            title={soundEnabled ? 'Silenciar alertas' : 'Ativar alertas sonoros'}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: '8px 16px', borderRadius: 999, cursor: 'pointer',
+              background: soundEnabled ? 'rgba(249,115,22,0.15)' : 'rgba(255,255,255,0.06)',
+              border: `1px solid ${soundEnabled ? 'rgba(249,115,22,0.5)' : 'rgba(255,255,255,0.12)'}`,
+              color: soundEnabled ? '#f97316' : '#71717a',
+              fontSize: 13, fontWeight: 600,
+              transition: 'all 0.2s ease',
+            }}
+          >
+            <span style={{ fontSize: 16 }}>{soundEnabled ? '🔔' : '🔕'}</span>
+            <span>{soundEnabled ? 'Som ativo' : 'Sem som'}</span>
+          </button>
+
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: 36, fontWeight: 700, fontVariantNumeric: 'tabular-nums', color: '#f97316' }}>
+              <Clock />
+            </div>
+            <div style={{ fontSize: 12, color: '#71717a' }}>
+              Últ. atualiz: {lastUpdate.toLocaleTimeString('pt-BR')}
+            </div>
           </div>
         </div>
       </header>
@@ -284,11 +390,16 @@ export default function TVFila() {
         )}
       </div>
 
-      {/* Pulse animation */}
+      {/* Animations */}
       <style>{`
         @keyframes tv-pulse {
           0%, 100% { opacity: 1; transform: scale(1); }
           50% { opacity: 0.4; transform: scale(0.8); }
+        }
+        @keyframes tv-flash {
+          0%   { opacity: 1; }
+          50%  { opacity: 0.6; }
+          100% { opacity: 0; }
         }
       `}</style>
     </div>
