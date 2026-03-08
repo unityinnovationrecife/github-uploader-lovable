@@ -82,8 +82,10 @@ export type Database = {
       orders: {
         Row: {
           address: string
+          archived: boolean
           created_at: string
           customer_name: string
+          customer_phone: string | null
           delivery_fee: number
           delivery_zone: string
           delivery_zone_name: string
@@ -95,8 +97,10 @@ export type Database = {
         }
         Insert: {
           address: string
+          archived?: boolean
           created_at?: string
           customer_name: string
+          customer_phone?: string | null
           delivery_fee?: number
           delivery_zone: string
           delivery_zone_name: string
@@ -108,8 +112,10 @@ export type Database = {
         }
         Update: {
           address?: string
+          archived?: boolean
           created_at?: string
           customer_name?: string
+          customer_phone?: string | null
           delivery_fee?: number
           delivery_zone?: string
           delivery_zone_name?: string

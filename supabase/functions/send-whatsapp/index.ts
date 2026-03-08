@@ -5,13 +5,33 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+async function sendMessage(
+  baseUrl: string,
+  instance: string,
+  apiKey: string,
+  phone: string,
+  text: string,
+): Promise<{ ok: boolean; status: number; body: string }> {
+  const url = `${baseUrl}/message/sendText/${instance}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': apiKey },
+    body: JSON.stringify({ number: phone, text }),
+  });
+  const body = await res.text();
+  return { ok: res.ok, status: res.status, body };
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { message } = await req.json();
+    // message       — mensagem para o lojista (obrigatória)
+    // customerPhone — número do cliente, ex: "5581999990000" (opcional)
+    // customerMessage — mensagem de confirmação para o cliente (opcional)
+    const { message, customerPhone, customerMessage } = await req.json();
 
     if (!message) {
       return new Response(JSON.stringify({ error: 'message is required' }), {
@@ -33,31 +53,36 @@ Deno.serve(async (req) => {
     }
 
     const baseUrl = EVOLUTION_API_URL.replace(/\/+$/, '');
-    const url = `${baseUrl}/message/sendText/${EVOLUTION_INSTANCE}`;
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': EVOLUTION_API_KEY,
-      },
-      body: JSON.stringify({
-        number: EVOLUTION_PHONE,
-        text: message,
-      }),
-    });
+    // 1) Enviar para o lojista (sempre)
+    const ownerResult = await sendMessage(baseUrl, EVOLUTION_INSTANCE, EVOLUTION_API_KEY, EVOLUTION_PHONE, message);
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Evolution API error:', response.status, errorText);
-      return new Response(JSON.stringify({ error: 'Evolution API error', details: errorText }), {
-        status: response.status,
+    if (!ownerResult.ok) {
+      console.error('Evolution API error (owner):', ownerResult.status, ownerResult.body);
+      return new Response(JSON.stringify({ error: 'Evolution API error', details: ownerResult.body }), {
+        status: ownerResult.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const data = await response.json();
-    return new Response(JSON.stringify({ success: true, data }), {
+    // 2) Enviar para o cliente (se número e mensagem fornecidos)
+    let customerResult = null;
+    if (customerPhone && customerMessage) {
+      // Normaliza: remove tudo que não for dígito e garante código do país 55
+      const digits = customerPhone.replace(/\D/g, '');
+      const normalized = digits.startsWith('55') ? digits : `55${digits}`;
+
+      try {
+        customerResult = await sendMessage(baseUrl, EVOLUTION_INSTANCE, EVOLUTION_API_KEY, normalized, customerMessage);
+        if (!customerResult.ok) {
+          console.warn('Evolution API error (customer):', customerResult.status, customerResult.body);
+        }
+      } catch (e) {
+        console.warn('Failed to send customer message:', e);
+      }
+    }
+
+    return new Response(JSON.stringify({ success: true, customerNotified: customerResult?.ok ?? false }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (err) {
