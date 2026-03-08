@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, ChevronDown, ChevronUp, ChevronRight, Clock, CheckCircle, XCircle, Truck, ChefHat } from 'lucide-react';
+import { Loader2, ChevronDown, ChevronUp, ChevronRight, Clock, CheckCircle, XCircle, Truck, ChefHat, Bell } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useOrderSound } from '@/hooks/use-order-sound';
 
 type OrderItem = {
   id: string;
