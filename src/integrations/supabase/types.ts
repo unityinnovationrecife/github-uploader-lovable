@@ -35,6 +35,39 @@ export type Database = {
         }
         Relationships: []
       }
+      delivery_zones: {
+        Row: {
+          active: boolean
+          created_at: string
+          display_order: number
+          fee: number
+          id: string
+          key: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          display_order?: number
+          fee?: number
+          id?: string
+          key: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          display_order?: number
+          fee?: number
+          id?: string
+          key?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           created_at: string
@@ -178,6 +211,45 @@ export type Database = {
           name?: string
           price?: number
           visible?: boolean
+        }
+        Relationships: []
+      }
+      store_hours: {
+        Row: {
+          active: boolean
+          close_hour: number
+          close_minute: number
+          created_at: string
+          day_type: string
+          id: string
+          label: string
+          open_hour: number
+          open_minute: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          close_hour?: number
+          close_minute?: number
+          created_at?: string
+          day_type: string
+          id?: string
+          label: string
+          open_hour?: number
+          open_minute?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          close_hour?: number
+          close_minute?: number
+          created_at?: string
+          day_type?: string
+          id?: string
+          label?: string
+          open_hour?: number
+          open_minute?: number
+          updated_at?: string
         }
         Relationships: []
       }
