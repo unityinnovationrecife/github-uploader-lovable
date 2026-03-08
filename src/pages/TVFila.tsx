@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { Sun, Moon } from 'lucide-react';
 import logo from '@/assets/logo.png';
 
 type OrderItem = {
