@@ -598,21 +598,29 @@ export default function AdminConfiguracoes() {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-6">
-        <Tabs defaultValue="general" className="space-y-6">
-          <TabsList className="grid grid-cols-3 w-full max-w-md">
-            <TabsTrigger value="general" className="flex items-center gap-2">
+        <Tabs defaultValue="appearance" className="space-y-6">
+          <TabsList className="grid grid-cols-4 w-full max-w-xl">
+            <TabsTrigger value="appearance" className="flex items-center gap-1.5">
+              <Palette className="w-4 h-4" />
+              Aparência
+            </TabsTrigger>
+            <TabsTrigger value="general" className="flex items-center gap-1.5">
               <Settings className="w-4 h-4" />
               Geral
             </TabsTrigger>
-            <TabsTrigger value="zones" className="flex items-center gap-2">
+            <TabsTrigger value="zones" className="flex items-center gap-1.5">
               <MapPin className="w-4 h-4" />
               Zonas
             </TabsTrigger>
-            <TabsTrigger value="hours" className="flex items-center gap-2">
+            <TabsTrigger value="hours" className="flex items-center gap-1.5">
               <Clock className="w-4 h-4" />
               Horários
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="appearance">
+            <AppearanceTab />
+          </TabsContent>
 
           <TabsContent value="general">
             <GeneralTab />
