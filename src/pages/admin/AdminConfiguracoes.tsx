@@ -445,23 +445,31 @@ export default function AdminConfiguracoes() {
       <div className="flex-shrink-0 px-6 py-4 border-b border-border bg-card">
         <h1 className="text-xl font-bold text-foreground">Configurações da Loja</h1>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Gerencie zonas de entrega, taxas de frete e horários de funcionamento
+          Gerencie configurações gerais, zonas de entrega e horários de funcionamento
         </p>
       </div>
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-6">
-        <Tabs defaultValue="zones" className="space-y-6">
-          <TabsList className="grid grid-cols-2 w-full max-w-sm">
+        <Tabs defaultValue="general" className="space-y-6">
+          <TabsList className="grid grid-cols-3 w-full max-w-md">
+            <TabsTrigger value="general" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              Geral
+            </TabsTrigger>
             <TabsTrigger value="zones" className="flex items-center gap-2">
               <MapPin className="w-4 h-4" />
-              Zonas de Entrega
+              Zonas
             </TabsTrigger>
             <TabsTrigger value="hours" className="flex items-center gap-2">
               <Clock className="w-4 h-4" />
               Horários
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="general">
+            <GeneralTab />
+          </TabsContent>
 
           <TabsContent value="zones" className="max-w-2xl">
             <DeliveryZonesTab />
