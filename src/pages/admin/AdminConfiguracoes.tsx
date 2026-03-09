@@ -42,6 +42,82 @@ const fromTimeString = (t: string): [number, number] => {
   return [h || 0, m || 0];
 };
 
+// ─── Geral ───────────────────────────────────────────────────────────────────
+
+function GeneralTab() {
+  const [whatsapp, setWhatsapp] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    supabase
+      .from('store_settings' as never)
+      .select('value')
+      .eq('key', 'whatsapp_number')
+      .maybeSingle()
+      .then(({ data }: { data: { value: string } | null }) => {
+        if (data?.value) setWhatsapp(data.value);
+        setLoading(false);
+      });
+  }, []);
+
+  async function handleSave() {
+    if (!whatsapp.trim()) { toast.error('Número obrigatório'); return; }
+    setSaving(true);
+    const { error } = await (supabase as ReturnType<typeof supabase.from> extends never ? never : typeof supabase)
+      .from('store_settings' as never)
+      .upsert({ key: 'whatsapp_number', value: whatsapp.trim() }, { onConflict: 'key' });
+    setSaving(false);
+    if (error) { toast.error('Erro ao salvar'); return; }
+    toast.success('Número salvo com sucesso!');
+  }
+
+  if (loading) return (
+    <div className="flex items-center justify-center py-16">
+      <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+    </div>
+  );
+
+  return (
+    <Card className="max-w-lg">
+      <CardHeader>
+        <CardTitle className="text-base">Botão de WhatsApp</CardTitle>
+        <CardDescription>
+          Número exibido no botão flutuante da loja. Use o formato internacional sem espaços ou símbolos (ex: 5581999999999).
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-1.5">
+          <Label htmlFor="whatsapp-number">Número do WhatsApp</Label>
+          <div className="flex gap-2">
+            <Input
+              id="whatsapp-number"
+              value={whatsapp}
+              onChange={e => setWhatsapp(e.target.value)}
+              placeholder="5581999999999"
+              maxLength={20}
+            />
+            <Button onClick={handleSave} disabled={saving} className="flex-shrink-0">
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              <span className="ml-1">Salvar</span>
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Código do país + DDD + número (55 = Brasil)
+          </p>
+        </div>
+
+        <div className="rounded-lg bg-muted/50 border border-border p-3 text-sm text-muted-foreground">
+          <span className="font-medium text-foreground">Preview do link: </span>
+          <span className="font-mono text-xs break-all">
+            wa.me/{whatsapp || '5581999999999'}
+          </span>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 // ─── Zonas de Entrega ─────────────────────────────────────────────────────────
 
 function DeliveryZonesTab() {
