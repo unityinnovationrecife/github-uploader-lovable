@@ -3,13 +3,15 @@ import { supabase } from '@/integrations/supabase/client';
 
 const FALLBACK = '5581999999999';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const db = supabase as any;
+
 export function useWhatsAppNumber() {
   const [number, setNumber] = useState<string>(FALLBACK);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase
-      .from('store_settings' as never)
+    db.from('store_settings')
       .select('value')
       .eq('key', 'whatsapp_number')
       .maybeSingle()
