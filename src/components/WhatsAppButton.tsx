@@ -1,10 +1,9 @@
 import { MessageCircle } from 'lucide-react';
-
-// Número fixo — pode ser extraído de configurações futuras
-const WHATSAPP_NUMBER = '5581999999999';
+import { useWhatsAppNumber } from '@/hooks/use-whatsapp-number';
 
 export default function WhatsAppButton() {
-  const href = `https://wa.me/${WHATSAPP_NUMBER}?text=Olá! Vim pelo cardápio online e gostaria de mais informações.`;
+  const { number } = useWhatsAppNumber();
+  const href = `https://wa.me/${number}?text=Olá! Vim pelo cardápio online e gostaria de mais informações.`;
 
   return (
     <a

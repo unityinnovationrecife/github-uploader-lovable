@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import {
-  MapPin, Clock, Plus, Trash2, Save, GripVertical, Loader2,
+  MapPin, Clock, Plus, Trash2, Save, GripVertical, Loader2, Settings,
 } from 'lucide-react';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -41,6 +41,84 @@ const fromTimeString = (t: string): [number, number] => {
   const [h, m] = t.split(':').map(Number);
   return [h || 0, m || 0];
 };
+
+// ─── Geral ───────────────────────────────────────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const db = supabase as any;
+
+function GeneralTab() {
+  const [whatsapp, setWhatsapp] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    db.from('store_settings')
+      .select('value')
+      .eq('key', 'whatsapp_number')
+      .maybeSingle()
+      .then(({ data }: { data: { value: string } | null }) => {
+        if (data?.value) setWhatsapp(data.value);
+        setLoading(false);
+      });
+  }, []);
+
+  async function handleSave() {
+    if (!whatsapp.trim()) { toast.error('Número obrigatório'); return; }
+    setSaving(true);
+    const { error } = await db
+      .from('store_settings')
+      .upsert({ key: 'whatsapp_number', value: whatsapp.trim() }, { onConflict: 'key' });
+    setSaving(false);
+    if (error) { toast.error('Erro ao salvar'); return; }
+    toast.success('Número salvo com sucesso!');
+  }
+
+  if (loading) return (
+    <div className="flex items-center justify-center py-16">
+      <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+    </div>
+  );
+
+  return (
+    <Card className="max-w-lg">
+      <CardHeader>
+        <CardTitle className="text-base">Botão de WhatsApp</CardTitle>
+        <CardDescription>
+          Número exibido no botão flutuante da loja. Use o formato internacional sem espaços ou símbolos (ex: 5581999999999).
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-1.5">
+          <Label htmlFor="whatsapp-number">Número do WhatsApp</Label>
+          <div className="flex gap-2">
+            <Input
+              id="whatsapp-number"
+              value={whatsapp}
+              onChange={e => setWhatsapp(e.target.value)}
+              placeholder="5581999999999"
+              maxLength={20}
+            />
+            <Button onClick={handleSave} disabled={saving} className="flex-shrink-0">
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              <span className="ml-1">Salvar</span>
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Código do país + DDD + número (55 = Brasil)
+          </p>
+        </div>
+
+        <div className="rounded-lg bg-muted/50 border border-border p-3 text-sm text-muted-foreground">
+          <span className="font-medium text-foreground">Preview do link: </span>
+          <span className="font-mono text-xs break-all">
+            wa.me/{whatsapp || '5581999999999'}
+          </span>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 // ─── Zonas de Entrega ─────────────────────────────────────────────────────────
 
@@ -367,23 +445,31 @@ export default function AdminConfiguracoes() {
       <div className="flex-shrink-0 px-6 py-4 border-b border-border bg-card">
         <h1 className="text-xl font-bold text-foreground">Configurações da Loja</h1>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Gerencie zonas de entrega, taxas de frete e horários de funcionamento
+          Gerencie configurações gerais, zonas de entrega e horários de funcionamento
         </p>
       </div>
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-6">
-        <Tabs defaultValue="zones" className="space-y-6">
-          <TabsList className="grid grid-cols-2 w-full max-w-sm">
+        <Tabs defaultValue="general" className="space-y-6">
+          <TabsList className="grid grid-cols-3 w-full max-w-md">
+            <TabsTrigger value="general" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              Geral
+            </TabsTrigger>
             <TabsTrigger value="zones" className="flex items-center gap-2">
               <MapPin className="w-4 h-4" />
-              Zonas de Entrega
+              Zonas
             </TabsTrigger>
             <TabsTrigger value="hours" className="flex items-center gap-2">
               <Clock className="w-4 h-4" />
               Horários
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="general">
+            <GeneralTab />
+          </TabsContent>
 
           <TabsContent value="zones" className="max-w-2xl">
             <DeliveryZonesTab />
