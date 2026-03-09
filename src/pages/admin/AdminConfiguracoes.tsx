@@ -44,14 +44,16 @@ const fromTimeString = (t: string): [number, number] => {
 
 // ─── Geral ───────────────────────────────────────────────────────────────────
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const db = supabase as any;
+
 function GeneralTab() {
   const [whatsapp, setWhatsapp] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    supabase
-      .from('store_settings' as never)
+    db.from('store_settings')
       .select('value')
       .eq('key', 'whatsapp_number')
       .maybeSingle()
@@ -64,8 +66,8 @@ function GeneralTab() {
   async function handleSave() {
     if (!whatsapp.trim()) { toast.error('Número obrigatório'); return; }
     setSaving(true);
-    const { error } = await (supabase as ReturnType<typeof supabase.from> extends never ? never : typeof supabase)
-      .from('store_settings' as never)
+    const { error } = await db
+      .from('store_settings')
       .upsert({ key: 'whatsapp_number', value: whatsapp.trim() }, { onConflict: 'key' });
     setSaving(false);
     if (error) { toast.error('Erro ao salvar'); return; }
