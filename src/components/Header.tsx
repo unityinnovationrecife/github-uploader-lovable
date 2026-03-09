@@ -4,6 +4,7 @@ import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import logo from '@/assets/logo.png';
 import { useStoreHours, getStoreStatusFromHours } from '@/hooks/use-store-settings';
+import { useStoreBranding } from '@/hooks/use-store-branding';
 
 export default function Header() {
   const { toggleCart, getTotalItems } = useCartStore();

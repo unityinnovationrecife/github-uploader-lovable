@@ -6,9 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import {
-  MapPin, Clock, Plus, Trash2, Save, GripVertical, Loader2, Settings,
+  MapPin, Clock, Plus, Trash2, Save, GripVertical, Loader2, Settings, Palette,
 } from 'lucide-react';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
