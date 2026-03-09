@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import {
-  MapPin, Clock, Plus, Trash2, Save, GripVertical, Loader2,
+  MapPin, Clock, Plus, Trash2, Save, GripVertical, Loader2, Settings,
 } from 'lucide-react';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
