@@ -47,18 +47,25 @@ const fromTimeString = (t: string): [number, number] => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
 
+const DEFAULT_MESSAGE = 'Olá! Vim pelo cardápio online e gostaria de mais informações.';
+
 function GeneralTab() {
   const [whatsapp, setWhatsapp] = useState('');
+  const [message, setMessage] = useState(DEFAULT_MESSAGE);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     db.from('store_settings')
-      .select('value')
-      .eq('key', 'whatsapp_number')
-      .maybeSingle()
-      .then(({ data }: { data: { value: string } | null }) => {
-        if (data?.value) setWhatsapp(data.value);
+      .select('key, value')
+      .in('key', ['whatsapp_number', 'whatsapp_message'])
+      .then(({ data }: { data: { key: string; value: string }[] | null }) => {
+        if (data) {
+          const num = data.find(r => r.key === 'whatsapp_number');
+          const msg = data.find(r => r.key === 'whatsapp_message');
+          if (num?.value) setWhatsapp(num.value);
+          if (msg?.value) setMessage(msg.value);
+        }
         setLoading(false);
       });
   }, []);
@@ -68,11 +75,19 @@ function GeneralTab() {
     setSaving(true);
     const { error } = await db
       .from('store_settings')
-      .upsert({ key: 'whatsapp_number', value: whatsapp.trim() }, { onConflict: 'key' });
+      .upsert(
+        [
+          { key: 'whatsapp_number', value: whatsapp.trim() },
+          { key: 'whatsapp_message', value: message.trim() || DEFAULT_MESSAGE },
+        ],
+        { onConflict: 'key' },
+      );
     setSaving(false);
     if (error) { toast.error('Erro ao salvar'); return; }
-    toast.success('Número salvo com sucesso!');
+    toast.success('Configurações salvas!');
   }
+
+  const previewLink = `wa.me/${whatsapp || '5581999999999'}?text=${encodeURIComponent(message || DEFAULT_MESSAGE)}`;
 
   if (loading) return (
     <div className="flex items-center justify-center py-16">
@@ -85,36 +100,54 @@ function GeneralTab() {
       <CardHeader>
         <CardTitle className="text-base">Botão de WhatsApp</CardTitle>
         <CardDescription>
-          Número exibido no botão flutuante da loja. Use o formato internacional sem espaços ou símbolos (ex: 5581999999999).
+          Configure o número e a mensagem pré-preenchida do botão flutuante na loja.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-5">
+        {/* Número */}
         <div className="space-y-1.5">
           <Label htmlFor="whatsapp-number">Número do WhatsApp</Label>
-          <div className="flex gap-2">
-            <Input
-              id="whatsapp-number"
-              value={whatsapp}
-              onChange={e => setWhatsapp(e.target.value)}
-              placeholder="5581999999999"
-              maxLength={20}
-            />
-            <Button onClick={handleSave} disabled={saving} className="flex-shrink-0">
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              <span className="ml-1">Salvar</span>
-            </Button>
-          </div>
+          <Input
+            id="whatsapp-number"
+            value={whatsapp}
+            onChange={e => setWhatsapp(e.target.value)}
+            placeholder="5581999999999"
+            maxLength={20}
+          />
           <p className="text-xs text-muted-foreground">
-            Código do país + DDD + número (55 = Brasil)
+            Formato internacional sem espaços: código do país + DDD + número (ex: 5581999999999)
           </p>
         </div>
 
-        <div className="rounded-lg bg-muted/50 border border-border p-3 text-sm text-muted-foreground">
-          <span className="font-medium text-foreground">Preview do link: </span>
-          <span className="font-mono text-xs break-all">
-            wa.me/{whatsapp || '5581999999999'}
-          </span>
+        {/* Mensagem */}
+        <div className="space-y-1.5">
+          <Label htmlFor="whatsapp-message">Mensagem pré-preenchida</Label>
+          <textarea
+            id="whatsapp-message"
+            value={message}
+            onChange={e => setMessage(e.target.value)}
+            rows={3}
+            maxLength={300}
+            placeholder={DEFAULT_MESSAGE}
+            className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+          />
+          <p className="text-xs text-muted-foreground text-right">
+            {message.length}/300 caracteres
+          </p>
         </div>
+
+        {/* Preview */}
+        <div className="rounded-lg bg-muted/50 border border-border p-3 space-y-1">
+          <p className="text-xs font-medium text-foreground">Preview do link</p>
+          <p className="font-mono text-[11px] text-muted-foreground break-all leading-relaxed">
+            {previewLink}
+          </p>
+        </div>
+
+        <Button onClick={handleSave} disabled={saving} className="w-full">
+          {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+          Salvar configurações
+        </Button>
       </CardContent>
     </Card>
   );
