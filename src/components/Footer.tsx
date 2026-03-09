@@ -1,4 +1,8 @@
+import { useStoreBranding } from '@/hooks/use-store-branding';
+
 export default function Footer() {
+  const { storeName, storeSlogan } = useStoreBranding();
+
   return (
     <footer className="bg-[var(--bg-secondary)] border-t border-[var(--border-color)] mt-16 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -10,9 +14,9 @@ export default function Footer() {
             </div>
             <div>
               <h3 className="text-base font-bold text-[var(--text-primary)]">
-                G & S <span className="text-orange-500">Salgados</span>
+                {storeName}
               </h3>
-              <p className="text-xs text-[var(--text-muted)]">O melhor sabor da cidade</p>
+              <p className="text-xs text-[var(--text-muted)]">{storeSlogan}</p>
             </div>
           </div>
 
@@ -31,7 +35,7 @@ export default function Footer() {
 
         <div className="mt-8 pt-6 border-t border-[var(--border-color)] text-center">
           <p className="text-xs text-[var(--text-muted)]">
-            © {new Date().getFullYear()} G & S Salgados. Todos os direitos reservados.
+            © {new Date().getFullYear()} {storeName}. Todos os direitos reservados.
           </p>
         </div>
       </div>

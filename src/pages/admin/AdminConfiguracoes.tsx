@@ -6,9 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import {
-  MapPin, Clock, Plus, Trash2, Save, GripVertical, Loader2, Settings,
+  MapPin, Clock, Plus, Trash2, Save, GripVertical, Loader2, Settings, Palette,
 } from 'lucide-react';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -48,6 +49,119 @@ const fromTimeString = (t: string): [number, number] => {
 const db = supabase as any;
 
 const DEFAULT_MESSAGE = 'Olá! Vim pelo cardápio online e gostaria de mais informações.';
+
+// ─── Aparência ────────────────────────────────────────────────────────────────
+
+const DEFAULT_STORE_NAME = 'G & S Salgados';
+const DEFAULT_STORE_SLOGAN = 'O melhor sabor da cidade';
+
+function AppearanceTab() {
+  const [storeName, setStoreName] = useState('');
+  const [storeSlogan, setStoreSlogan] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    db.from('store_settings')
+      .select('key, value')
+      .in('key', ['store_name', 'store_slogan'])
+      .then(({ data }: { data: { key: string; value: string }[] | null }) => {
+        if (data) {
+          const name = data.find((r: { key: string }) => r.key === 'store_name');
+          const slogan = data.find((r: { key: string }) => r.key === 'store_slogan');
+          setStoreName(name?.value ?? DEFAULT_STORE_NAME);
+          setStoreSlogan(slogan?.value ?? DEFAULT_STORE_SLOGAN);
+        } else {
+          setStoreName(DEFAULT_STORE_NAME);
+          setStoreSlogan(DEFAULT_STORE_SLOGAN);
+        }
+        setLoading(false);
+      });
+  }, []);
+
+  async function handleSave() {
+    if (!storeName.trim()) { toast.error('Nome da loja obrigatório'); return; }
+    setSaving(true);
+    const { error } = await db
+      .from('store_settings')
+      .upsert(
+        [
+          { key: 'store_name', value: storeName.trim() },
+          { key: 'store_slogan', value: storeSlogan.trim() || DEFAULT_STORE_SLOGAN },
+        ],
+        { onConflict: 'key' },
+      );
+    setSaving(false);
+    if (error) { toast.error('Erro ao salvar'); return; }
+    toast.success('Aparência atualizada!');
+  }
+
+  if (loading) return (
+    <div className="flex items-center justify-center py-16">
+      <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+    </div>
+  );
+
+  return (
+    <Card className="max-w-lg">
+      <CardHeader>
+        <CardTitle className="text-base">Identidade da Loja</CardTitle>
+        <CardDescription>
+          Nome e slogan exibidos no cabeçalho da loja para os clientes.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-5">
+        {/* Nome */}
+        <div className="space-y-1.5">
+          <Label htmlFor="store-name">Nome da loja</Label>
+          <Input
+            id="store-name"
+            value={storeName}
+            onChange={e => setStoreName(e.target.value)}
+            placeholder={DEFAULT_STORE_NAME}
+            maxLength={60}
+          />
+          <p className="text-xs text-muted-foreground">
+            Aparece ao lado do logo no cabeçalho (visível em telas maiores).
+          </p>
+        </div>
+
+        {/* Slogan */}
+        <div className="space-y-1.5">
+          <Label htmlFor="store-slogan">Slogan</Label>
+          <Input
+            id="store-slogan"
+            value={storeSlogan}
+            onChange={e => setStoreSlogan(e.target.value)}
+            placeholder={DEFAULT_STORE_SLOGAN}
+            maxLength={80}
+          />
+          <p className="text-xs text-muted-foreground">
+            Frase curta exibida abaixo do nome da loja.
+          </p>
+        </div>
+
+        {/* Preview */}
+        <div className="rounded-lg bg-muted/50 border border-border p-4 space-y-0.5">
+          <p className="text-xs font-medium text-muted-foreground mb-2">Preview no cabeçalho</p>
+          <p className="text-sm font-bold text-foreground leading-none">
+            {storeName || DEFAULT_STORE_NAME}
+          </p>
+          <p className="text-[11px] text-muted-foreground">
+            {storeSlogan || DEFAULT_STORE_SLOGAN}
+          </p>
+        </div>
+
+        <Button onClick={handleSave} disabled={saving} className="w-full">
+          {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
+          Salvar aparência
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── Geral ───────────────────────────────────────────────────────────────────
 
 function GeneralTab() {
   const [whatsapp, setWhatsapp] = useState('');
@@ -122,14 +236,14 @@ function GeneralTab() {
         {/* Mensagem */}
         <div className="space-y-1.5">
           <Label htmlFor="whatsapp-message">Mensagem pré-preenchida</Label>
-          <textarea
+          <Textarea
             id="whatsapp-message"
             value={message}
             onChange={e => setMessage(e.target.value)}
             rows={3}
             maxLength={300}
             placeholder={DEFAULT_MESSAGE}
-            className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+            className="resize-none"
           />
           <p className="text-xs text-muted-foreground text-right">
             {message.length}/300 caracteres
@@ -484,21 +598,29 @@ export default function AdminConfiguracoes() {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-6">
-        <Tabs defaultValue="general" className="space-y-6">
-          <TabsList className="grid grid-cols-3 w-full max-w-md">
-            <TabsTrigger value="general" className="flex items-center gap-2">
+        <Tabs defaultValue="appearance" className="space-y-6">
+          <TabsList className="grid grid-cols-4 w-full max-w-xl">
+            <TabsTrigger value="appearance" className="flex items-center gap-1.5">
+              <Palette className="w-4 h-4" />
+              Aparência
+            </TabsTrigger>
+            <TabsTrigger value="general" className="flex items-center gap-1.5">
               <Settings className="w-4 h-4" />
               Geral
             </TabsTrigger>
-            <TabsTrigger value="zones" className="flex items-center gap-2">
+            <TabsTrigger value="zones" className="flex items-center gap-1.5">
               <MapPin className="w-4 h-4" />
               Zonas
             </TabsTrigger>
-            <TabsTrigger value="hours" className="flex items-center gap-2">
+            <TabsTrigger value="hours" className="flex items-center gap-1.5">
               <Clock className="w-4 h-4" />
               Horários
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="appearance">
+            <AppearanceTab />
+          </TabsContent>
 
           <TabsContent value="general">
             <GeneralTab />

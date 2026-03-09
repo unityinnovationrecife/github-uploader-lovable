@@ -4,6 +4,7 @@ import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import logo from '@/assets/logo.png';
 import { useStoreHours, getStoreStatusFromHours } from '@/hooks/use-store-settings';
+import { useStoreBranding } from '@/hooks/use-store-branding';
 
 export default function Header() {
   const { toggleCart, getTotalItems } = useCartStore();
@@ -13,6 +14,7 @@ export default function Header() {
   const [showBanner, setShowBanner] = useState(true);
   const { hours } = useStoreHours();
   const [storeStatus, setStoreStatus] = useState(getStoreStatusFromHours([]));
+  const { storeName, storeSlogan } = useStoreBranding();
 
   useEffect(() => {
     setMounted(true);
@@ -59,41 +61,49 @@ export default function Header() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
 
-            {/* Logo + status */}
+            {/* Logo + nome + status */}
             <div className="flex items-center gap-3">
-              <img src={logo} alt="G&S Salgados" className="h-12 sm:h-16 w-auto object-contain" />
-              {mounted && (
-                <div className="flex flex-col gap-0.5">
-                  <span
-                    className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2 py-0.5 rounded-full ${
-                      storeStatus.isOpen
-                        ? storeStatus.closingSoon
-                          ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
-                          : 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400'
-                        : 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400'
-                    }`}
-                  >
+              <img src={logo} alt={storeName} className="h-12 sm:h-16 w-auto object-contain" />
+              <div className="flex flex-col gap-0.5">
+                {/* Nome e slogan */}
+                <div className="hidden sm:flex flex-col leading-tight">
+                  <span className="text-sm font-bold text-[var(--text-primary)] leading-none">{storeName}</span>
+                  <span className="text-[11px] text-[var(--text-muted)]">{storeSlogan}</span>
+                </div>
+                {/* Status */}
+                {mounted && (
+                  <>
                     <span
-                      className={`w-1.5 h-1.5 rounded-full ${
+                      className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2 py-0.5 rounded-full w-fit ${
                         storeStatus.isOpen
                           ? storeStatus.closingSoon
-                            ? 'bg-amber-500 animate-pulse'
-                            : 'bg-green-500 animate-pulse'
-                          : 'bg-red-500'
+                            ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
+                            : 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400'
+                          : 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400'
                       }`}
-                    />
-                    {storeStatus.isOpen
-                      ? storeStatus.closingSoon
-                        ? 'Fechando em breve'
-                        : 'Aberto agora'
-                      : 'Fechado'}
-                  </span>
-                  <span className="flex items-center gap-1 text-[10px] text-[var(--text-muted)]">
-                    <Clock className="w-3 h-3" />
-                    {storeStatus.hours}
-                  </span>
-                </div>
-              )}
+                    >
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          storeStatus.isOpen
+                            ? storeStatus.closingSoon
+                              ? 'bg-amber-500 animate-pulse'
+                              : 'bg-green-500 animate-pulse'
+                            : 'bg-red-500'
+                        }`}
+                      />
+                      {storeStatus.isOpen
+                        ? storeStatus.closingSoon
+                          ? 'Fechando em breve'
+                          : 'Aberto agora'
+                        : 'Fechado'}
+                    </span>
+                    <span className="flex items-center gap-1 text-[10px] text-[var(--text-muted)]">
+                      <Clock className="w-3 h-3" />
+                      {storeStatus.hours}
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
 
             {/* Ações */}
