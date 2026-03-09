@@ -14,6 +14,7 @@ export default function Header() {
   const [showBanner, setShowBanner] = useState(true);
   const { hours } = useStoreHours();
   const [storeStatus, setStoreStatus] = useState(getStoreStatusFromHours([]));
+  const { storeName, storeSlogan } = useStoreBranding();
 
   useEffect(() => {
     setMounted(true);
